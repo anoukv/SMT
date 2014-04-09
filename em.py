@@ -22,18 +22,21 @@ def initializeT(coprus):
 				translationProbs[(f, e)] = 1
 	return translationProbs
 
-def anoukTest(e_set, fe_set, t):
-	for e in e_set:
-		max = 0
-		trans = None
-		for (f, e1) in fe_set:
-			if e1 == e:
-				val = t[(f, e)]
-				if val > max:
-					max = val
-					trans = f
-		print e, trans, max
+def maxViterbiAlignment(corpus, t):
+	for (f_s, e_s) in corpus:
+		alignment = []
+		for f in f_s:
+			max = 0
+			bestE = None
+			for e in e_s:
+				prob = t[(f, e)]
+				if prob > max:
+					max = prob
+					bestE = e
 
+			alignment.append((f, bestE))
+	# we don't know format of output yet
+	return 
 
 def em(corpus):
 	t = initializeT(corpus)
@@ -72,26 +75,9 @@ def em(corpus):
 			t[(f,e)] = new
 		print "Change in this iteration:", change
 
-	# anoukTest(e_set, fe_set, t)
+	return t
 
 if __name__ == "__main__":
 	corpus = loadData()
-	em(corpus)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	t = em(corpus)
+	maxViterbiAlignment(corpus, t)
