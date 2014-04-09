@@ -10,7 +10,7 @@ def loadData(f = "corpus.nl", e = "corpus.en"):
 	e = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
 	fileo.close()
 
-	return (f, e)
+	return zip(f, e)
 
 if __name__ == "__main__":
-	print loadData()[0][:5]
+	print loadData()[0]
