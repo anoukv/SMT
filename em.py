@@ -21,5 +21,18 @@ def initializeT(coprus):
 				translationProbs[(f, e)] = 1
 	return translationProbs
 
+def em(corpus):
+	t = initializeT(corpus)
+	e_set = set()
+	for (_, e) in corpus:
+		for elem in e:
+			e_set.add(elem)
+
+	print len(e_set)
+
+	for _ in xrange(10):
+		pass
+
 if __name__ == "__main__":
 	corpus = loadData()
+	# em(corpus)
