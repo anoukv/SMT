@@ -22,6 +22,19 @@ def initializeT(coprus):
 				translationProbs[(f, e)] = 1
 	return translationProbs
 
+def anoukTest(e_set, fe_set, t):
+	for e in e_set:
+		max = 0
+		trans = None
+		for (f, e1) in fe_set:
+			if e1 == e:
+				val = t[(f, e)]
+				if val > max:
+					max = val
+					trans = f
+		print e, trans, max
+
+
 def em(corpus):
 	t = initializeT(corpus)
 
@@ -54,11 +67,12 @@ def em(corpus):
 
 		change = 0
 		for (f, e) in fe_set:
-			new = count[(f,e)] / total[(f,e)]
+			new = count[(f,e)] / total[e]
 			change += abs(t[(f,e)] - new)
 			t[(f,e)] = new
 		print "Change in this iteration:", change
 
+	# anoukTest(e_set, fe_set, t)
 
 if __name__ == "__main__":
 	corpus = loadData()
