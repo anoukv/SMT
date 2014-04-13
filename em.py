@@ -12,6 +12,7 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo.close()
 
 	return zip(f, e)
+
 def precision(referenceAlignments, ourAlignments):
 	# we cannot really work with sets here, since they actually make sense
 	# let's do this first
