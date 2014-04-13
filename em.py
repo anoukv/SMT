@@ -30,8 +30,12 @@ def initializeT_counted(coprus):
 	return translationProbs
 
 def maxViterbiAlignment(corpus, t):
+	allAlignments = []
 	for (f_s, e_s) in corpus:
 		alignment = []
+
+		print f_s
+		print e_s
 		for f in f_s:
 			max = 0
 			bestE = None
@@ -41,9 +45,12 @@ def maxViterbiAlignment(corpus, t):
 					max = prob
 					bestE = e
 
+
 			alignment.append((f, bestE))
-	# we don't know format of output yet
-	return 
+		print alignment
+		print
+		allAlignments.append(alignment)
+	return allAlignments
 
 def em(corpus, init=initializeT):
 	t = init(corpus)
@@ -58,7 +65,7 @@ def em(corpus, init=initializeT):
 		for elem in f:
 			f_set.add(elem)
 
-	for _ in xrange(20):
+	for _ in xrange(10):
 		count = dict( [(fe, 0) for fe in fe_set] )
 		total = dict( [(e, 0) for e in e_set] )
 
@@ -86,16 +93,15 @@ def em(corpus, init=initializeT):
 
 if __name__ == "__main__":
 	corpus = loadData()
-	t, change = em(corpus)
-	print "Naive error:", change
-	t, change = em(corpus, initializeT_counted)
-	print "New error:", change
 
-
-
-
-
-
-
+	cute = False
+	if cute:
+		t = em(corpus)
+		alignments = maxViterbiAlignment(corpus, t)
+	else:
+		t, change = em(corpus)
+		print "Naive error:", change
+		t, change = em(corpus, initializeT_counted)
+		print "New error:", change
 
 
