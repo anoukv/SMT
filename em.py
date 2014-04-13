@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo = open(f,'r')
 	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
@@ -12,11 +15,18 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 
 def initializeT(coprus):
 	translationProbs = dict()
-	
 	for sentencePair in coprus:
 		for f in sentencePair[0]:
 			for e in sentencePair[1]:
 				translationProbs[(f, e)] = 1
+	return translationProbs
+
+def initializeT_counted(coprus):
+	translationProbs = defaultdict(int)
+	for sentencePair in coprus:
+		for f in sentencePair[0]:
+			for e in sentencePair[1]:
+				translationProbs[(f, e)] += 1
 	return translationProbs
 
 def maxViterbiAlignment(corpus, t):
@@ -39,8 +49,8 @@ def maxViterbiAlignment(corpus, t):
 		allAlignments.append(alignment)
 	return allAlignments
 
-def em(corpus):
-	t = initializeT(corpus)
+def em(corpus, init=initializeT):
+	t = init(corpus)
 
 	fe_set = set(t.keys())
 
@@ -74,11 +84,21 @@ def em(corpus):
 			new = count[(f,e)] / total[e]
 			change += abs(t[(f,e)] - new)
 			t[(f,e)] = new
-		print "Change in this iteration:", change
+		# print "Change in this iteration:", change
 
-	return t
+	return t, change
 
 if __name__ == "__main__":
 	corpus = loadData()
-	t = em(corpus)
-	alignments = maxViterbiAlignment(corpus, t)
+
+	cute = False
+	if cute:
+		t = em(corpus)
+		alignments = maxViterbiAlignment(corpus, t)
+	else:
+		t, change = em(corpus)
+		print "Naive error:", change
+		t, change = em(corpus, initializeT_counted)
+		print "New error:", change
+
+
