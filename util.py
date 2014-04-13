@@ -7,7 +7,7 @@ def read_vit(filename="viterbi.small"):
 
 	sentence_count = len(lines) / 3
 	sentences = []
-	for _ in xrange(5): #xrange(sentence_count):
+	for _ in xrange(sentence_count):
 		# This line is bs
 		lines.pop(0)
 
@@ -27,7 +27,8 @@ def read_vit(filename="viterbi.small"):
 				pairs.append((firstline[index], word))
 
 		sentences.append(pairs)
-		print pairs
+	
+	return sentences
 		
 
 
