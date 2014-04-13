@@ -12,6 +12,16 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 
 	return zip(f, e)
 
+def precision(referenceAlignments, ourAlignments):
+	# we cannot really work with sets here, since they actually make sense
+	# let's do this first
+	return len(set(referenceAlignments).intersection(set(ourAlignments))) / float(len(ourAlignments))
+
+def recall(referenceAlignments, ourAlignments):
+	# again sets are not really allowed...
+	# needs fixing
+	return len(set(referenceAlignments).intersection(set(ourAlignments))) / float(len(referenceAlignments))
+
 def initializeT(coprus):
 	translationProbs = dict()
 	for sentencePair in coprus:
@@ -32,9 +42,6 @@ def maxViterbiAlignment(corpus, t):
 	allAlignments = []
 	for (f_s, e_s) in corpus:
 		alignment = []
-
-		print f_s
-		print e_s
 		for f in f_s:
 			max = 0
 			bestE = None
