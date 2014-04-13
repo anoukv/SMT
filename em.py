@@ -1,6 +1,3 @@
-
-
-
 def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo = open(f,'r')
 	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
@@ -23,8 +20,12 @@ def initializeT(coprus):
 	return translationProbs
 
 def maxViterbiAlignment(corpus, t):
+	allAlignments = []
 	for (f_s, e_s) in corpus:
 		alignment = []
+
+		print f_s
+		print e_s
 		for f in f_s:
 			max = 0
 			bestE = None
@@ -34,9 +35,12 @@ def maxViterbiAlignment(corpus, t):
 					max = prob
 					bestE = e
 
+
 			alignment.append((f, bestE))
-	# we don't know format of output yet
-	return 
+		print alignment
+		print
+		allAlignments.append(alignment)
+	return allAlignments
 
 def em(corpus):
 	t = initializeT(corpus)
@@ -80,4 +84,4 @@ def em(corpus):
 if __name__ == "__main__":
 	corpus = loadData()
 	t = em(corpus)
-	maxViterbiAlignment(corpus, t)
+	alignments = maxViterbiAlignment(corpus, t)
