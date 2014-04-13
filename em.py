@@ -23,9 +23,6 @@ def maxViterbiAlignment(corpus, t):
 	allAlignments = []
 	for (f_s, e_s) in corpus:
 		alignment = []
-
-		print f_s
-		print e_s
 		for f in f_s:
 			max = 0
 			bestE = None
