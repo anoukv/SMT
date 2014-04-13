@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-
 def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo = open(f,'r')
 	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
@@ -44,8 +43,6 @@ def maxViterbiAlignment(corpus, t):
 				if prob > max:
 					max = prob
 					bestE = e
-
-
 			alignment.append((f, bestE))
 		print alignment
 		print
