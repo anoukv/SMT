@@ -1,12 +1,3 @@
-%
-% File acl2012.tex
-%
-% Contact: Maggie Li (cswjli@comp.polyu.edu.hk), Michael White (mwhite@ling.osu.edu)
-%%
-%% Based on the style files for ACL2008 by Joakim Nivre and Noah Smith
-%% and that of ACL2010 by Jing-Shin Chang and Philipp Koehn
-
-
 \documentclass[11pt]{article}
 \usepackage{acl2012}
 \usepackage{times}
@@ -17,11 +8,11 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \setlength\titlebox{6.5cm}    % Expanding the titlebox
 
-\title{Instructions for ACL2012 Proceedings}
+\title{IBM Model 1}
 
 \author{Anouk Visser \\
   Affiliation / Address line 1 \\
-  {\tt email@domain} \\\And
+  {\tt anouk.visser@student.uva.nl} \\\And
   R\'emi de Zoeten \\
   Affiliation / Address line 1 \\
   {\tt email@domain} \\}
@@ -32,22 +23,24 @@
 \maketitle
 
 \section{Introduction}
-Intro
+One solution to machine translation is to find translations of words in the sentence. IBM Model 1 is an example of such a word-based model. In this report we present our implementation of IBM Model 1 and its Expectation-Maximization (EM) training. In section \ref{IBM} we will give a little background on IBM Model 1, in section \ref{em} we lay out the EM formulas. In section \ref{own} we propose a simple improvement to IBM Model 1 reducing its assumptions. Finally, we present our results in section \ref{results}.
 
 
 \section{IBM Model I}
-IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the expectation maximisation algorithm described in \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
+\label{IBM}
+IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
 
-\section{Expectation maximisation training formula}
+\section{Expectation Maximization Training Formula}
 \label{em}
-The expectation maximisation (em) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialised uniformly and are stored in a translation table $T$
+The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialized uniformly and are stored in a translation table $T$
 
 \section{Improvements}
+\label{own}
 
 \section{Results}
+\label{results}
 
-
-
+\section{Conclusion}
 
 \begin{thebibliography}{}
 
