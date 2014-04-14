@@ -14,16 +14,46 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 
 	return zip(f, e)
 
+def average_sentence_score(referenceAlignments, ourAlignments, method):
+	return sum(map(lambda x : method(x[0], x[1]), zip(referenceAlignments, ourAlignments))) / float(len(referenceAlignments))
+
+def transform_to_counted_dict(list_set):
+	total = defaultdict(int)
+	for elem in list_set:
+		total[elem] += 1
+	return total
 
 def precision(referenceAlignments, ourAlignments):
-	# we cannot really work with sets here, since they actually make sense
-	# let's do this first
-	return len(set(referenceAlignments).intersection(set(ourAlignments))) / float(len(ourAlignments))
+	refset = set(referenceAlignments)
+	ourset = set(ourAlignments)
+	intersect = refset.intersection(ourset)
+
+	counted_ref = transform_to_counted_dict(referenceAlignments)
+	counted_our = transform_to_counted_dict(ourAlignments)
+
+	total_good = 0
+	for e in intersect:
+		total_good += counted_our[e] 
+		if counted_our[e] > counted_ref[e]:
+			total_good -= counted_our[e] - counted_ref[e]
+
+	return  total_good / float(len(ourAlignments))
 
 def recall(referenceAlignments, ourAlignments):
-	# again sets are not really allowed...
-	# needs fixing
-	return len(set(referenceAlignments).intersection(set(ourAlignments))) / float(len(referenceAlignments))
+	refset = set(referenceAlignments)
+	ourset = set(ourAlignments)
+	intersect = refset.intersection(ourset)
+
+	counted_ref = transform_to_counted_dict(referenceAlignments)
+	counted_our = transform_to_counted_dict(ourAlignments)
+
+	total_good = 0
+	for e in intersect:
+		total_good += counted_our[e] 
+		if counted_our[e] > counted_ref[e]:
+			total_good -= counted_our[e] - counted_ref[e]
+
+	return  total_good / float(len(referenceAlignments))
 
 def initializeT(coprus):
 	translationProbs = dict()
@@ -54,12 +84,10 @@ def maxViterbiAlignment(corpus, t):
 					max = prob
 					bestE = e
 			alignment.append((f, bestE))
-		print alignment
-		print
 		allAlignments.append(alignment)
 	return allAlignments
 
-def em(corpus, init=initializeT, iterations=10):
+def em(corpus, iterations=10, init=initializeT_counted):
 	t = init(corpus)
 
 	fe_set = set(t.keys())
@@ -104,14 +132,23 @@ if __name__ == "__main__":
 	print "Loading corpus..."
 	corpus = loadData()
 
-	cute = True
-	if cute:
+	cute = 1
+	if cute == 1:
 		print "Generating translation table..."
-		t = em(corpus, initializeT_counted, 3)
+		t, change = em(corpus, 20)
+		print "Table error:", change
+
+	elif cute == 2:
+		print "Generating translation table..."
+		t, change = em(corpus)
+		print "Table error:", change
+
 		alignments = maxViterbiAlignment(corpus, t)
 		baseline = read_vit()
-		p = precision(baseline, alignments)
-		r = recall(baseline, alignments)
+
+		p = average_sentence_score(baseline, alignments, precision)
+		r = average_sentence_score(baseline, alignments, recall) 
+
 		print "P:", p, "R:", r
 	else:
 		t, change = em(corpus)
