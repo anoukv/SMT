@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+from util import read_vit
+
 def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo = open(f,'r')
 	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
@@ -11,6 +13,7 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo.close()
 
 	return zip(f, e)
+
 
 def precision(referenceAlignments, ourAlignments):
 	# we cannot really work with sets here, since they actually make sense
@@ -56,7 +59,7 @@ def maxViterbiAlignment(corpus, t):
 		allAlignments.append(alignment)
 	return allAlignments
 
-def em(corpus, init=initializeT):
+def em(corpus, init=initializeT, iterations=10):
 	t = init(corpus)
 
 	fe_set = set(t.keys())
@@ -69,7 +72,7 @@ def em(corpus, init=initializeT):
 		for elem in f:
 			f_set.add(elem)
 
-	for _ in xrange(10):
+	for _ in xrange(iterations):
 		count = dict( [(fe, 0) for fe in fe_set] )
 		total = dict( [(e, 0) for e in e_set] )
 
@@ -96,16 +99,26 @@ def em(corpus, init=initializeT):
 	return t, change
 
 if __name__ == "__main__":
+	from time import time
+	start = time()
+	print "Loading corpus..."
 	corpus = loadData()
 
-	cute = False
+	cute = True
 	if cute:
-		t = em(corpus)
+		print "Generating translation table..."
+		t = em(corpus, initializeT_counted, 3)
 		alignments = maxViterbiAlignment(corpus, t)
+		baseline = read_vit()
+		p = precision(baseline, alignments)
+		r = recall(baseline, alignments)
+		print "P:", p, "R:", r
 	else:
 		t, change = em(corpus)
 		print "Naive error:", change
 		t, change = em(corpus, initializeT_counted)
 		print "New error:", change
+	stop = time()
+	print "Time spend:", int(stop - start + 0.5), "seconds"
 
 
