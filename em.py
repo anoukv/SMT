@@ -14,6 +14,8 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 
 	return zip(f, e)
 
+# computes the average precision or recall (specified by method)
+# over all sentences
 def average_sentence_score(referenceAlignments, ourAlignments, method):
 	return sum(map(lambda x : method(x[0], x[1]), zip(referenceAlignments, ourAlignments))) / float(len(referenceAlignments))
 
@@ -23,6 +25,7 @@ def transform_to_counted_dict(list_set):
 		total[elem] += 1
 	return total
 
+# Calculates alignment precision
 def precision(referenceAlignments, ourAlignments):
 	refset = set(referenceAlignments)
 	ourset = set(ourAlignments)
@@ -39,6 +42,7 @@ def precision(referenceAlignments, ourAlignments):
 
 	return  total_good / float(len(ourAlignments))
 
+# Calculates alignment precision
 def recall(referenceAlignments, ourAlignments):
 	refset = set(referenceAlignments)
 	ourset = set(ourAlignments)
@@ -55,6 +59,9 @@ def recall(referenceAlignments, ourAlignments):
 
 	return  total_good / float(len(referenceAlignments))
 
+# Initializes the translation table uniformly
+# in this case we'll just set every possible alignment
+# (e, j) to 1
 def initializeT(coprus):
 	translationProbs = dict()
 	for sentencePair in coprus:
@@ -63,6 +70,7 @@ def initializeT(coprus):
 				translationProbs[(f, e)] = 1
 	return translationProbs
 
+# impprovmenet of uniform initializatoin
 def initializeT_counted(coprus):
 	translationProbs = defaultdict(int)
 	for sentencePair in coprus:
@@ -71,6 +79,8 @@ def initializeT_counted(coprus):
 				translationProbs[(f, e)] += 1
 	return translationProbs
 
+# writes the translation table to the file "translations"
+# for every f, it finds the most probable translation e
 def writeTranslationTableToFile(t):
 	file = open('translations', 'w')
 	
@@ -83,10 +93,14 @@ def writeTranslationTableToFile(t):
 				bestTrans[f] = (e, t[(f, e)])
 
 	for f in bestTrans:
-		print f, bestTrans[f][0]
 		file.write(f + " " + bestTrans[f][0] +"\n")
 	file.close()
 
+# Outputs the viterbi alignments, by matching f, with the 
+# e that has the highest probability. We can do this using
+# only the translation table because we are working with a
+# word-based model, so the viterbi alignment equals the translations
+# that have the highest probabilities.
 def maxViterbiAlignment(corpus, t):
 	allAlignments = []
 	for (f_s, e_s) in corpus:
@@ -103,6 +117,7 @@ def maxViterbiAlignment(corpus, t):
 		allAlignments.append(alignment)
 	return allAlignments
 
+# the EM algorithm for IBM Model 1
 def em(corpus, iterations=10, init=initializeT_counted):
 	t = init(corpus)
 
@@ -148,20 +163,13 @@ if __name__ == "__main__":
 	print "Loading corpus..."
 	corpus = loadData()
 
-<<<<<<< HEAD
-	cute = True
-	if cute:
-		iterations = 3
-		t, change = em(corpus, iterations, initializeT)
-		print "Table error:", change
-=======
 	iterations = 20
+	
 	t, change = em(corpus, iterations, initializeT)
 	print "Table error:", change
 
 	alignments = maxViterbiAlignment(corpus, t)
 	baseline = read_vit()
->>>>>>> 0e87ba2130a6903ac832cbcd01a1f31117f8a4e4
 
 	p = average_sentence_score(baseline, alignments, precision)
 	r = average_sentence_score(baseline, alignments, recall) 
