@@ -34,18 +34,18 @@ IBM model 1 is the first and least complex in the series of IBM translation mode
 \section{Expectation Maximization Training Formula}
 \label{em}
 The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialized uniformly and are stored in a translation table $T$. By first applying the current model to the data (starting with uniform) we can get an expectation (E-step), we can use this information to learn the model from the actual data (M-step).\\\\
-The E-step is performed separately for every sentence pair. We iterate over all possible alignments to find the probability of an alignment given the source and the target by looking up the probability for the required translations (for that specific alignment) in the translation table and normalizing this: 
+The E-step is performed separately for every sentence pair. We iterate over all possible alignments to find the probability of an alignment given the source and the target by looking up the probability for the required translations (for that specific alignment) in the translation table and normalizing the following formula: 
 $$P_t(a|f, e) = \prod\limits_{j=1}^{m} (\frac{t(f_j|e_{a_{j}})}{\sum\limits_{i=0}^{l}t(f_j|e_i)})$$
 The M-step re-estimates the translation probabilities by weighing the counts of the number of times an alignment occurred by its probability and normalizing this. 
 $$t(f|e) = \frac{\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}{\sum\limits_{e}\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}$$
 
 \section{Improvements}
 \label{own}
-The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. What we did was assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data. Doing this requires no extra computations. We expect that this initialization gives higher precesion and recall than uniform initialization when performing the same amount of expectation maximization algorithms. In section \ref{results} we present our results.
+The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. What we did was assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data, considering every possible alignment. Doing this requires no extra computations. We expect that this initialization gives higher precision and recall than uniform initialization when performing the same amount of expectation maximization algorithms. In section \ref{results} we present our results.
 
 \section{Results}
 \label{results}
-We tested our results on the $1000$ sentences that were provided to us. We performed two tests with 3 and 20 expectation maximization iterations over the data and calculated the average recall and precision for all sentences in the data. 
+We tested our results on the $1000$ sentences that were provided to us. We performed two tests with 3 and 20 expectation maximization iterations over the data and calculated the average recall and precision for all sentences in the data. 'Uniform' indicates a uniform initialization of the translation table $T$, 'Frequency' indicates an initialization proportional to the frequency.
 
 \begin{table}[H]
     \begin{tabular}{lll}
@@ -65,9 +65,8 @@ We tested our results on the $1000$ sentences that were provided to us. We perfo
     \caption{Performance score after 20 EM iterations}
 \end{table}
 
-
 \section{Conclusion}
-
+We succeeded in implementing IBM model one and reported precision and recall for the training data. We made a small improvement to the EM algorithm by applying a heuristic during initialization. The improvement assures that the EM algorithm converges faster while having no additional computational costs.
 \begin{thebibliography}{}
 
 \bibitem[\protect\citename{Aho and Ullman}1972]{Aho:72}
