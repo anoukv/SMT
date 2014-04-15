@@ -33,7 +33,11 @@ IBM model 1 is the first and least complex in the series of IBM translation mode
 
 \section{Expectation Maximization Training Formula}
 \label{em}
-The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialized uniformly and are stored in a translation table $T$
+The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialized uniformly and are stored in a translation table $T$. By first applying the current model to the data (starting with uniform) we can get an expectation (E-step), we can use this information to learn the model from the actual data (M-step).\\\\
+The E-step is performed separately for every sentence pair. We iterate over all possible alignments to find the probability of an alignment given the source and the target by looking up the probability for the required translations (for that specific alignment) in the translation table and normalizing this: 
+$$P_t(a|f, e) = \prod\limits_{j=1}^{m} (\frac{t(f_j|e_{a_{j}})}{\sum\limits_{i=0}^{l}t(f_j|e_i)})$$
+The M-step re-estimates the translation probabilities by weighing the counts of the number of times an alignment occurred by its probability and normalizing this. 
+$$t(f|e) = \frac{\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}{\sum\limits_{e}\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}$$
 
 \section{Improvements}
 \label{own}
