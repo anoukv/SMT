@@ -28,7 +28,7 @@ One solution to machine translation is to find translations of words in the sent
 
 \section{IBM Model I}
 \label{IBM}
-IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
+IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in section \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
 
 \section{Expectation Maximization Training Formula}
 \label{em}
