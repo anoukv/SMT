@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from util import read_vit
 
+# This just reads the corpus.
 def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 	fileo = open(f,'r')
 	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
@@ -19,6 +20,7 @@ def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
 def average_sentence_score(referenceAlignments, ourAlignments, method):
 	return sum(map(lambda x : method(x[0], x[1]), zip(referenceAlignments, ourAlignments))) / float(len(referenceAlignments))
 
+# Counts every item in a list, returns as a dictionary.
 def transform_to_counted_dict(list_set):
 	total = defaultdict(int)
 	for elem in list_set:
