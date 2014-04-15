@@ -132,15 +132,10 @@ if __name__ == "__main__":
 	print "Loading corpus..."
 	corpus = loadData()
 
-	cute = 1
-	if cute == 1:
-		print "Generating translation table..."
-		t, change = em(corpus, 20)
-		print "Table error:", change
-
-	elif cute == 2:
-		print "Generating translation table..."
-		t, change = em(corpus)
+	cute = True
+	if cute:
+		iterations = 20
+		t, change = em(corpus, iterations, initializeT)
 		print "Table error:", change
 
 		alignments = maxViterbiAlignment(corpus, t)
@@ -150,6 +145,17 @@ if __name__ == "__main__":
 		r = average_sentence_score(baseline, alignments, recall) 
 
 		print "P:", p, "R:", r
+
+		t, change = em(corpus, iterations)
+		print "Table error:", change
+
+		alignments = maxViterbiAlignment(corpus, t)
+
+		p = average_sentence_score(baseline, alignments, precision)
+		r = average_sentence_score(baseline, alignments, recall) 
+
+		print "P:", p, "R:", r
+
 	else:
 		t, change = em(corpus)
 		print "Naive error:", change
