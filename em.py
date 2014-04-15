@@ -71,6 +71,22 @@ def initializeT_counted(coprus):
 				translationProbs[(f, e)] += 1
 	return translationProbs
 
+def writeTranslationTableToFile(t):
+	file = open('translations', 'w')
+	
+	bestTrans = dict()
+	for (f, e) in t:
+		if f not in bestTrans:
+			bestTrans[f] = (e, t[(f, e)])
+		else:
+			if t[(f, e)] > bestTrans[f][1]:
+				bestTrans[f] = (e, t[(f, e)])
+
+	for f in bestTrans:
+		print f, bestTrans[f][0]
+		file.write(f + " " + bestTrans[f][0] +"\n")
+	file.close()
+
 def maxViterbiAlignment(corpus, t):
 	allAlignments = []
 	for (f_s, e_s) in corpus:
@@ -132,35 +148,30 @@ if __name__ == "__main__":
 	print "Loading corpus..."
 	corpus = loadData()
 
-	cute = True
-	if cute:
-		iterations = 20
-		t, change = em(corpus, iterations, initializeT)
-		print "Table error:", change
+	iterations = 20
+	t, change = em(corpus, iterations, initializeT)
+	print "Table error:", change
 
-		alignments = maxViterbiAlignment(corpus, t)
-		baseline = read_vit()
+	alignments = maxViterbiAlignment(corpus, t)
+	baseline = read_vit()
 
-		p = average_sentence_score(baseline, alignments, precision)
-		r = average_sentence_score(baseline, alignments, recall) 
+	p = average_sentence_score(baseline, alignments, precision)
+	r = average_sentence_score(baseline, alignments, recall) 
 
-		print "P:", p, "R:", r
+	print "P:", p, "R:", r
 
-		t, change = em(corpus, iterations)
-		print "Table error:", change
+	t, change = em(corpus, iterations)
+	print "Table error:", change
 
-		alignments = maxViterbiAlignment(corpus, t)
+	alignments = maxViterbiAlignment(corpus, t)
 
-		p = average_sentence_score(baseline, alignments, precision)
-		r = average_sentence_score(baseline, alignments, recall) 
+	p = average_sentence_score(baseline, alignments, precision)
+	r = average_sentence_score(baseline, alignments, recall) 
 
-		print "P:", p, "R:", r
+	print "P:", p, "R:", r
 
-	else:
-		t, change = em(corpus)
-		print "Naive error:", change
-		t, change = em(corpus, initializeT_counted)
-		print "New error:", change
+	writeTranslationTableToFile(t)
+
 	stop = time()
 	print "Time spend:", int(stop - start + 0.5), "seconds"
 
