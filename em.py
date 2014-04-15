@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
 	cute = True
 	if cute:
-		iterations = 20
+		iterations = 3
 		t, change = em(corpus, iterations, initializeT)
 		print "Table error:", change
 

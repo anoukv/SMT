@@ -5,6 +5,7 @@
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{url}
+\usepackage{float}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \setlength\titlebox{6.5cm}    % Expanding the titlebox
 
@@ -15,7 +16,7 @@
   {\tt anouk.visser@student.uva.nl} \\\And
   R\'emi de Zoeten \\
   Affiliation / Address line 1 \\
-  {\tt email@domain} \\}
+  {\tt remi.de.z@gmail.com} \\}
 
 \date{}
 
@@ -28,7 +29,7 @@ One solution to machine translation is to find translations of words in the sent
 
 \section{IBM Model I}
 \label{IBM}
-IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
+IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in section \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
 
 \section{Expectation Maximization Training Formula}
 \label{em}
@@ -36,9 +37,30 @@ The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate t
 
 \section{Improvements}
 \label{own}
+The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. What we did was assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data. Doing this requires no extra computations. We expect that this initialization gives higher precesion and recall than uniform initialization when performing the same amount of expectation maximization algorithms. In section \ref{results} we present our results.
 
 \section{Results}
 \label{results}
+We tested our results on the $1000$ sentences that were provided to us. We performed two tests with 3 and 20 expectation maximization iterations over the data and calculated the average recall and precision for all sentences in the data. 
+
+\begin{table}[H]
+    \begin{tabular}{lll}
+    ~ & recall  & precision \\
+    Uniform & 0.863 & 0.863 \\
+    Frequency & 0.883 & 0.883 \\
+    \end{tabular}
+    \caption{Performance score after 3 EM iterations}
+\end{table}
+
+\begin{table}[H]
+    \begin{tabular}{lll}
+    ~ & recall  & precision \\
+    Uniform & 0.930 & 0.930 \\
+    Frequency & 0.932 & 0.932 \\
+    \end{tabular}
+    \caption{Performance score after 20 EM iterations}
+\end{table}
+
 
 \section{Conclusion}
 
