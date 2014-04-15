@@ -148,12 +148,20 @@ if __name__ == "__main__":
 	print "Loading corpus..."
 	corpus = loadData()
 
+<<<<<<< HEAD
+	cute = True
+	if cute:
+		iterations = 3
+		t, change = em(corpus, iterations, initializeT)
+		print "Table error:", change
+=======
 	iterations = 20
 	t, change = em(corpus, iterations, initializeT)
 	print "Table error:", change
 
 	alignments = maxViterbiAlignment(corpus, t)
 	baseline = read_vit()
+>>>>>>> 0e87ba2130a6903ac832cbcd01a1f31117f8a4e4
 
 	p = average_sentence_score(baseline, alignments, precision)
 	r = average_sentence_score(baseline, alignments, recall) 
