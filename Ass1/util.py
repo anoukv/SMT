@@ -28,8 +28,32 @@ def read_vit(filename="viterbi.small"):
 	
 	return sentences
 
-if __name__ == "__main__":
-	read_vit()
+# writes the translation table to the file "translations"
+# for every f, it finds the most probable translation e
+def writeTranslationTableToFile(t):
+	file = open('translations', 'w')
+	
+	bestTrans = dict()
+	for (f, e) in t:
+		if f not in bestTrans:
+			bestTrans[f] = (e, t[(f, e)])
+		else:
+			if t[(f, e)] > bestTrans[f][1]:
+				bestTrans[f] = (e, t[(f, e)])
 
+	for f in bestTrans:
+		file.write(f + " " + bestTrans[f][0] +"\n")
+	file.close()
 
+# This just reads the corpus.
+def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
+	fileo = open(f,'r')
+	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
+	fileo.close()
 
+	fileo = open(e,'r')
+	e = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
+	[ x.append("NULL") for x in e ]
+	fileo.close()
+
+	return zip(f, e)

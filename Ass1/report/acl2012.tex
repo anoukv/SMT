@@ -39,32 +39,49 @@ $$t(f|e) = \frac{\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \text
 
 \section{Improvements}
 \label{own}
-The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. What we did was assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data, considering every possible alignment. Doing this requires no extra computations. We expect that this initialization gives higher precision and recall than uniform initialization when performing the same amount of expectation maximization algorithms. In section \ref{results} we present our results.
+The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. We proposed and measured two modifications to the uniform initialization.
+Our first modification was to assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data, considering every possible alignment. Doing this requires no extra computations. 
+We also had the intuition that words would translate to words of similar character length. This would mean that when initializing the $T$ table, more probability mass should be assigned to word pairs $(f,e)$ if $e$ and $f$ are of similar size. In our second modification the probability of $P(f|e)$ is proportional to the relative frequency of $(f,e)$ in the data, multiplied by their smoothed length similarity defined as:
+
+$$ sim(e, f) = 
+\left\{
+	\begin{array}{ll}
+		\lambda + \frac{|e|}{|f|} & \mbox{if } |e| < |f| \\
+		\lambda + \frac{|f|}{|e|} & otherwise
+	\end{array}
+\right. $$
+
+\noindent
+$\lambda$ is a smoothing parameter, which we set to $1$.
+
+We expected that both initialization methods will produce higher precision and recall than uniform initialization when performing the same amount of expectation maximization iterations. Both modifications do not increase the computational complexity or the number of loops over the data. In section \ref{results} we present our results.
 
 \section{Results}
 \label{results}
-We tested our results on the $1000$ sentences that were provided to us. We performed two tests with 3 and 20 expectation maximization iterations over the data and calculated the average recall and precision for all sentences in the data. `Uniform' indicates a uniform initialization of the translation table $T$, `Frequency' indicates an initialization proportional to the frequency.
+We tested our results on the $1000$ sentences that were provided to us. We provide the precision, which is in this case the same value as the recall, because an alignment was generated for every word in the source language. We performed two tests with 3 and 20 expectation maximization iterations over the data present the average precision for all sentences in the data. `Uniform' indicates a uniform initialization of the translation table $T$, `Frequency' indicates an initialization proportional to the frequency and 'Freq$\times$sim' indicates an initialization proportional to the frequency multiplied by the estimated word similarity.
 
 \begin{table}[H]
     \begin{tabular}{lll}
-    ~ & recall  & precision \\
-    Uniform & 0.863 & 0.863 \\
-    Frequency & 0.883 & 0.883 \\
+    ~ & precision \\
+    Uniform & 0.863 \\
+    Frequency & \textbf{0.883} \\
+    Freq$\times$sim & 0.802
     \end{tabular}
     \caption{Performance score after 3 EM iterations}
 \end{table}
-
 \begin{table}[H]
     \begin{tabular}{lll}
-    ~ & recall  & precision \\
-    Uniform & 0.930 & 0.930 \\
-    Frequency & 0.932 & 0.932 \\
+    ~ & precision \\
+    Uniform & 0.930 \\
+    Frequency & \textbf{0.932} \\
+    Freq$\times$sim & 0.846
     \end{tabular}
     \caption{Performance score after 20 EM iterations}
 \end{table}
 
 \section{Conclusion}
-We succeeded in implementing IBM model 1 and reported precision and recall for the training data. We made a small improvement to the EM algorithm by applying a heuristic during initialization. The improvement assures that the EM algorithm converges faster while having no additional computational costs.
+We succeeded in implementing IBM model 1 and reported precision and recall for the training data. We improved upon the baseline with one of the two adjustments that we made to the EM algorithm. We showed that initialization based on frequency produces better results, while accounting for word length similarity severely decreases performance. Both adjustments do not affect the runtime of the algorithm.
+
 \begin{thebibliography}{}
 
 \bibitem[\protect\citename{Brown \bgroup \em et al.\egroup }{1993a}]{IBM}

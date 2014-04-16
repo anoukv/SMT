@@ -1,19 +1,6 @@
 from collections import defaultdict
 
-from util import read_vit
-
-# This just reads the corpus.
-def loadData(f = "corpus.small.nl", e = "corpus.small.en"):
-	fileo = open(f,'r')
-	f = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
-	fileo.close()
-
-	fileo = open(e,'r')
-	e = map(lambda x : x.replace("\n","").split(" "), fileo.readlines())
-	[ x.append("NULL") for x in e ]
-	fileo.close()
-
-	return zip(f, e)
+from util import *
 
 # computes the average precision or recall (specified by method)
 # over all sentences
@@ -44,23 +31,6 @@ def precision(referenceAlignments, ourAlignments):
 
 	return  total_good / float(len(ourAlignments))
 
-# Calculates alignment precision
-def recall(referenceAlignments, ourAlignments):
-	refset = set(referenceAlignments)
-	ourset = set(ourAlignments)
-	intersect = refset.intersection(ourset)
-
-	counted_ref = transform_to_counted_dict(referenceAlignments)
-	counted_our = transform_to_counted_dict(ourAlignments)
-
-	total_good = 0
-	for e in intersect:
-		total_good += counted_our[e] 
-		if counted_our[e] > counted_ref[e]:
-			total_good -= counted_our[e] - counted_ref[e]
-
-	return  total_good / float(len(referenceAlignments))
-
 # Initializes the translation table uniformly
 # in this case we'll just set every possible alignment
 # (e, j) to 1
@@ -72,7 +42,23 @@ def initializeT(coprus):
 				translationProbs[(f, e)] = 1
 	return translationProbs
 
-# impprovmenet of uniform initializatoin
+# initializatoin based on frequency and length similarity
+def initializeT_counted_lensim(coprus):
+	def word_similarity_score(word1, word2):
+		if len(word1) > len(word2):
+			tmp = word1
+			word1 = word2
+			word2 = tmp
+		return 1 + len(word1) / float(len(word2))
+
+	translationProbs = defaultdict(int)
+	for sentencePair in coprus:
+		for f in sentencePair[0]:
+			for e in sentencePair[1]:
+				translationProbs[(f, e)] += word_similarity_score(f,e)
+	return translationProbs
+
+# improvmenet over uniform initializatoin
 def initializeT_counted(coprus):
 	translationProbs = defaultdict(int)
 	for sentencePair in coprus:
@@ -80,23 +66,6 @@ def initializeT_counted(coprus):
 			for e in sentencePair[1]:
 				translationProbs[(f, e)] += 1
 	return translationProbs
-
-# writes the translation table to the file "translations"
-# for every f, it finds the most probable translation e
-def writeTranslationTableToFile(t):
-	file = open('translations', 'w')
-	
-	bestTrans = dict()
-	for (f, e) in t:
-		if f not in bestTrans:
-			bestTrans[f] = (e, t[(f, e)])
-		else:
-			if t[(f, e)] > bestTrans[f][1]:
-				bestTrans[f] = (e, t[(f, e)])
-
-	for f in bestTrans:
-		file.write(f + " " + bestTrans[f][0] +"\n")
-	file.close()
 
 # Outputs the viterbi alignments, by matching f, with the 
 # e that has the highest probability. We can do this using
@@ -162,34 +131,27 @@ def em(corpus, iterations=10, init=initializeT_counted):
 if __name__ == "__main__":
 	from time import time
 	start = time()
-	print "Loading corpus..."
 	corpus = loadData()
+	baseline = read_vit()
 
 	iterations = 20
 	
+	t, change = em(corpus, iterations, initializeT_counted_lensim)
+	alignments = maxViterbiAlignment(corpus, t)
+	p = average_sentence_score(baseline, alignments, precision)
+	print "P:", p
+
 	t, change = em(corpus, iterations, initializeT)
-	print "Table error:", change
-
 	alignments = maxViterbiAlignment(corpus, t)
-	baseline = read_vit()
-
 	p = average_sentence_score(baseline, alignments, precision)
-	r = average_sentence_score(baseline, alignments, recall) 
+	print "P:", p
 
-	print "P:", p, "R:", r
-
-	t, change = em(corpus, iterations)
-	print "Table error:", change
-
+	t, change = em(corpus, iterations, initializeT_counted)
 	alignments = maxViterbiAlignment(corpus, t)
-
 	p = average_sentence_score(baseline, alignments, precision)
-	r = average_sentence_score(baseline, alignments, recall) 
-
-	print "P:", p, "R:", r
+	print "P:", p
 
 	writeTranslationTableToFile(t)
-
 	stop = time()
 	print "Time spend:", int(stop - start + 0.5), "seconds"
 
