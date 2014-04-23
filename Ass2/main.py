@@ -5,7 +5,9 @@ def read_sentences_from_file(filename):
 	f = open(filename, 'r')
 	content = f.readlines()
 	f.close()
-	return filter(lambda x : not len(x) == 0, map(lambda y : filter(lambda x : not x in [" ",""], y.replace("\n","").split(" ")), content))
+	content = content.replace("\n","").split(" ")
+	content = [ [ y for y in x if y not in ["", " "] ] for x in content ]
+	return filter(lambda x : not len(x) == 0, content)
 
 def extract_phrases_from_sentence(sentence, length=4):
 	def add_gram_to_dic(gram, dic):
