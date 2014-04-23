@@ -1,0 +1,96 @@
+\documentclass[11pt]{article}
+\usepackage{acl2012}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{float}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\setlength\titlebox{6.5cm}    % Expanding the titlebox
+
+\title{IBM Model 1}
+
+\author{Anouk Visser \\
+  {\tt anouk.visser@student.uva.nl} \\\And
+  R\'emi de Zoeten \\
+  {\tt remi.de.z@gmail.com} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+One solution to machine translation is to find translations of words in the sentence. IBM Model 1 \cite{IBM} is an example of such a word-based model. In this report we present our implementation of IBM Model 1 and its Expectation-Maximization (EM) training. In section \ref{IBM} we will give a little background on IBM Model 1, in section \ref{em} we lay out the EM formulas. In section \ref{own} we propose a simple improvement to IBM Model 1 reducing its assumptions. Finally, we present our results in section \ref{results}.
+
+
+\section{IBM Model I}
+\label{IBM}
+IBM model 1 is the first and least complex in the series of IBM translation models. It is based only on word level translation probabilities that are derived from a training corpus. The model only defines translation probabilities as $P(f|e)$ where $f$ is a french word and $e$ is an english word and does not look at word context or sentence structure. The $P(f|e)$ is obtained using the EM algorithm described in section \ref{em}. IBM model 1 does not address word re-ordering or sentence structure.
+
+\section{Expectation Maximization Training Formula}
+\label{em}
+The Expectation-Maximization (EM) algorithm is used to iteratively re-estimate the probability of $P(f|e)$, converging on every iteration. The estimated probabilities $P(f|e)$ are initialized uniformly and are stored in a translation table $T$. By first applying the current model to the data (starting with uniform) we can get an expectation (E-step), we can use this information to learn the model from the actual data (M-step).\\\\
+The E-step is performed separately for every sentence pair. We iterate over all possible alignments to find the probability of an alignment given the source and the target by looking up the probability for the required translations (for that specific alignment) in the translation table and normalizing the following formula: 
+$$P_t(a|f, e) = \prod\limits_{j=1}^{m} (\frac{t(f_j|e_{a_{j}})}{\sum\limits_{i=0}^{l}t(f_j|e_i)})$$
+The M-step re-estimates the translation probabilities by weighing the counts of the number of times an alignment occurred by its probability and normalizing this. 
+$$t(f|e) = \frac{\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}{\sum\limits_{e}\sum\limits_{(\textbf{e}, \textbf{f})} c(e|f; \textbf{e}, \textbf{f})}$$
+
+\section{Improvements}
+\label{own}
+The expectation maximization algorithm needs to run many iterations, which can be time consuming. In the original IBM model the probabilities for all $P(f|e)$ stored in $T$ are initialized uniformly. Our intuition was that there is a better way to initialize it. When initializing the probabilities one has to loop over the corpus and observe all pairs $(f,e)$ and place them in the table. We proposed and measured two modifications to the uniform initialization.
+Our first modification was to assign a higher probability to pairs that are observed more frequently, because they can be considered more likely translation pairs for each other. So instead of initializing with a uniform probability, we initialized with a probability proportional to the relative frequency in the data, considering every possible alignment. Doing this requires no extra computations. 
+We also had the intuition that words would translate to words of similar character length. This would mean that when initializing the $T$ table, more probability mass should be assigned to word pairs $(f,e)$ if $e$ and $f$ are of similar size. In our second modification the probability of $P(f|e)$ is proportional to the relative frequency of $(f,e)$ in the data, multiplied by their smoothed length similarity defined as:
+
+$$ sim(e, f) = 
+\left\{
+	\begin{array}{ll}
+		\lambda + \frac{|e|}{|f|} & \mbox{if } |e| < |f| \\
+		\lambda + \frac{|f|}{|e|} & otherwise
+	\end{array}
+\right. $$
+
+\noindent
+$\lambda$ is a smoothing parameter, which we set to $1$.
+
+We expected that both initialization methods will produce higher precision and recall than uniform initialization when performing the same amount of expectation maximization iterations. Both modifications do not increase the computational complexity or the number of loops over the data. In section \ref{results} we present our results.
+
+\section{Results}
+\label{results}
+We tested our results on the $1000$ sentences that were provided to us. We provide the precision, which is in this case the same value as the recall, because an alignment was generated for every word in the source language. We performed two tests with 3 and 20 expectation maximization iterations over the data present the average precision for all sentences in the data. `Uniform' indicates a uniform initialization of the translation table $T$, `Frequency' indicates an initialization proportional to the frequency and 'Freq$\times$sim' indicates an initialization proportional to the frequency multiplied by the estimated word similarity.
+
+\begin{table}[H]
+    \begin{tabular}{lll}
+    ~ & precision \\
+    Uniform & 0.863 \\
+    Frequency & \textbf{0.883} \\
+    Freq$\times$sim & 0.802
+    \end{tabular}
+    \caption{Performance score after 3 EM iterations}
+\end{table}
+\begin{table}[H]
+    \begin{tabular}{lll}
+    ~ & precision \\
+    Uniform & 0.930 \\
+    Frequency & \textbf{0.932} \\
+    Freq$\times$sim & 0.846
+    \end{tabular}
+    \caption{Performance score after 20 EM iterations}
+\end{table}
+
+\section{Conclusion}
+We succeeded in implementing IBM model 1 and reported precision and recall for the training data. We improved upon the baseline with one of the two adjustments that we made to the EM algorithm. We showed that initialization based on frequency produces better results, while accounting for word length similarity severely decreases performance. Both adjustments do not affect the runtime of the algorithm.
+
+\begin{thebibliography}{}
+
+\bibitem[\protect\citename{Brown \bgroup \em et al.\egroup }{1993a}]{IBM}
+Brown, P.~F., V.~J.~Della Pietra, S.~A.~Della Pietra, and R.~L. Mercer. 1993.
+\newblock The mathematics of statistical machine translation: Parameter
+  estimation.
+\newblock {\em Computational Linguistics} 19(2).
+
+
+\end{thebibliography}
+
+\end{document}
