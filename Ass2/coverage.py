@@ -7,6 +7,6 @@ def coverageSimple(phraseTable1, phraseTable2):
 	numberOfPhrasesInCommon = len(phrases1.intersection(phrases2))
 	return numberOfPhrasesInCommon * 100 / float(len(phrases2))
 
-def coverage(phraseTable1, phraseTable1, n=3):
+def coverage(phraseTable1, phraseTable2, n=3):
 	coverage = 0
 	return coverage
