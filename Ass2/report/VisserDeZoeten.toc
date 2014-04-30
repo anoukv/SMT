@@ -1,0 +1,10 @@
+\contentsline {section}{\tocsection {}{1}{abstract}}{1}
+\contentsline {section}{\tocsection {}{2}{introduction}}{1}
+\contentsline {section}{\tocsection {}{3}{problem description}}{1}
+\contentsline {section}{\tocsection {}{4}{possible solutions}}{1}
+\contentsline {section}{\tocsection {}{5}{selected solution}}{1}
+\contentsline {section}{\tocsection {}{6}{discussion of existing work}}{1}
+\contentsline {section}{\tocsection {}{7}{implementation issues}}{1}
+\contentsline {section}{\tocsection {}{8}{experimental setting}}{1}
+\contentsline {section}{\tocsection {}{9}{results, analyses}}{1}
+\contentsline {section}{\tocsection {}{10}{conclusion}}{1}
