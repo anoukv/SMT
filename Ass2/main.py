@@ -1,16 +1,7 @@
+from utils import *
+
 from collections import defaultdict
 
-
-def read_sentences_from_file(filename):
-	"""
-		Reads sentences from file.
-	"""
-	f = open(filename, 'r')
-	content = f.readlines()
-	f.close()
-	content = [ c.replace("\n","").split(" ") for c in content ]
-	content = [ [ y for y in x if y not in ["", " "] ] for x in content ]
-	return filter(lambda x : not len(x) == 0, content)
 
 def extract_phrases_from_sentence(sentence, length=4):
 	"""
@@ -46,35 +37,40 @@ def extract_all_phrases(sentence_pairs):
 		# This function adds all items in phrases to dic
 		for key, value in phrases.items():
 			dic[key] += value
-	def add_phrases_to_coc(pf, pe, dic):
+	def add_phrases_to_coc(p1, p2, dic):
 		# This function adds for all p1 a count to p2.
-		# p1 and p2 are (pf,pe) and (pe,pf).
 		# This effectively registers all the cooccurence counts
-		for (p1, p2) in [(pf,pe), (pe,pf)]:
-			for key, value in p1.items():
-				for p in p2.keys():
-					if p not in dic:
-						dic[p] = defaultdict(int)
-					dic[p][key] += value
+		for key, value in p1.items():
+			for p in p2.keys():
+				if p not in dic:
+					dic[p] = defaultdict(int)
+				dic[p][key] += value
 
 	phrases_f = defaultdict(int) # These are the french sentences
 	phrases_e = defaultdict(int) # These are the english sentences
-	cocs = dict()	# This contains the cooccurences between phrase pairs.
+
+	cocs_e_to_f = dict() # This contains the cooccurences between phrase pairs.
+	cocs_f_to_e = dict() # This contains the cooccurences between phrase pairs.
+
 	for (sentence_f, sentence_e) in sentence_pairs:
 		p_f = extract_phrases_from_sentence(sentence_f)
 		p_e = extract_phrases_from_sentence(sentence_e)
 
 		add_phrases_to_dic(p_f, phrases_f)
 		add_phrases_to_dic(p_e, phrases_e)
-		add_phrases_to_coc(p_f, p_e, cocs)
+		add_phrases_to_coc(p_f, p_e, cocs_f_to_e)
+		add_phrases_to_coc(p_e, p_f, cocs_e_to_f)
 
-	return (phrases_f, phrases_e, cocs)
+	return (phrases_f, phrases_e, cocs_f_to_e, cocs_e_to_f)
 
 if __name__ == "__main__":
+	allignment = read_word_allignment_dicts()
+	print allignment[0]
+	assert False
 	s_f = read_sentences_from_file("training/p2_training.nl")
 	s_e = read_sentences_from_file("training/p2_training.en")
 	pairs = zip(s_f, s_e)
-	(phrases_f, phrases_e, cocs) = extract_all_phrases(pairs)
+	(phrases_f, phrases_e, cocs_f_to_e, cocs_e_to_f) = extract_all_phrases(pairs)
 	print len(phrases_f), len(phrases_e), len(cocs)
 
 
