@@ -28,3 +28,10 @@ def read_word_allignment_dicts(filename="training/p2_training_symal.nlen"):
 			d[x].add(y)
 		dict_content.append(dict(d))
 	return dict_content
+
+def invert_allignment(allignment):
+	inv_allignment = defaultdict(set)
+	for key, values in allignment.items():
+		for value in values:
+			inv_allignment[value].add(key)
+	return dict(inv_allignment)
