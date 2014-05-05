@@ -26,18 +26,27 @@ def coverage(phraseTable1, phraseTable2, n=3):
 			print "problem 1"
 		
 		queue = allowed[:len(test)]
+		index = 0
 
 		if queue == test:
-			return True
+			return True, index
 
 		index = len(test)
 		while index < len(allowed):
 			del queue[0]
+			index += 1
 			queue.append(allowed[index])
 			index += 1
 			if queue == test:
-				return True
-		return False
+				return True, index
+		return False, index
+
+	def findStart(start, dict):
+		returnList = []
+		for tup in dict:
+			if tup[0] == start:
+				returnList.append(tup)
+		return returnList
 
 	coverage = 0
 	
@@ -50,6 +59,7 @@ def coverage(phraseTable1, phraseTable2, n=3):
 		considerable = set()
 		found = False
 		
+		spanDict = defaultdict(set)
 		# go over all phrasePairs in phraseTable1
 		for phrasePair1 in prhaseTable1:
 			
@@ -68,20 +78,53 @@ def coverage(phraseTable1, phraseTable2, n=3):
 				# in the phrase pair that we are looking for and the phrase pairs are a 
 				# sequence (what I call a proper subset) of phrase pairs 2
 				if containsOnly(p11, p21) and containsOnly(p12, p22):
-					if properSubset(p11, p21) and properSubset(p12, p22):
-						considerable.add(phrasePair1)
+					(status1, index1) = properSubset(p11, p21)
+					(status2, index2) = properSubset(p12, p22)
+ 					if status1 and status2:
+ 						end1 = index1 + len(p11) - 1
+ 						end2 = index2 + len(p12) - 1
+						considerable.add((phrasePair1, index1, end1, index2, end2))
+						spanDict[(index1, end1)].add((index2, end2))		
 		
 		# if it was not found right away, we will try to rebuild it using considerable
 		# start at the beginning and build it up.
-		# early stopping for lenght constraints? 
+		# early stopping for length constraints? 
 		# isThisOk will check whether this is a valid next building block. 
 		# don't know yet how to do this correctly and efficiently 
+
 		if not found:
-			# try to build it
-			firsts = set()
-			for potentialFirst in considerable:
-				if isThisOk(phrasePair2, potentialFirst):
-					firsts.add(potentialFirst)
+			
+			# the set of expandable things, i.e. initially starting points
+			expandable = set(findStart(0, spanDict))
+			
+			# will keep track of the expansion choices for backtracking
+			choices = defaultdict(set)
+			
+			# keeps track of the things that were expanded
+			expanded = set()
+			
+			# as long as there are still things to be expanded
+			while len(expandable) > 0:
+				# create new expandable set
+				newExpandable = set()
+				# for every starting point
+				for startingPoint in expandable:
+					# remember that it has been expanded
+					expanded.add(startingPoint)
+					
+					# find blocks that continue using this starting point
+					new = findStart(startingPoint[1]+1, spanDict)
+					
+					# for every found next block
+					for item in new:	
+						# register choosing this block at this point
+						choices[startingPoint].add(item)
+						# if the item has not been expanded, add it to the new expandables
+						
+						if item not in expanded:
+							newExpandable.add(item)
+				# put newExpandable in expandable
+				expandable = newExpandable
 
 	return coverage
 
