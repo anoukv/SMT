@@ -86,14 +86,9 @@ def coverage(phraseTable1, phraseTable2, n=3):
 						considerable.add((phrasePair1, index1, end1, index2, end2))
 						spanDict[(index1, end1)].add((index2, end2))		
 		
-		# if it was not found right away, we will try to rebuild it using considerable
-		# start at the beginning and build it up.
-		# early stopping for length constraints? 
-		# isThisOk will check whether this is a valid next building block. 
-		# don't know yet how to do this correctly and efficiently 
-
+		# if it was not found right away, we will try to rebuild it using the spanDict
 		if not found:
-			
+
 			# the set of expandable things, i.e. initially starting points
 			expandable = set(findStart(0, spanDict))
 			
@@ -103,6 +98,9 @@ def coverage(phraseTable1, phraseTable2, n=3):
 			# keeps track of the things that were expanded
 			expanded = set()
 			
+			# keeps track of where the successes came from
+			succes = defaultdict(set)
+
 			# as long as there are still things to be expanded
 			while len(expandable) > 0:
 				# create new expandable set
@@ -116,7 +114,13 @@ def coverage(phraseTable1, phraseTable2, n=3):
 					new = findStart(startingPoint[1]+1, spanDict)
 					
 					# for every found next block
-					for item in new:	
+					for item in new:
+
+						# if this reaches the end of the sequence, it's a succes
+						# and we need to keep track of it
+						if item[1] == (len(p21) -1):
+							succes[item].add(startingPoint)
+
 						# register choosing this block at this point
 						choices[startingPoint].add(item)
 						# if the item has not been expanded, add it to the new expandables
@@ -128,5 +132,4 @@ def coverage(phraseTable1, phraseTable2, n=3):
 
 	return coverage
 
-	def isThisOk(whatWeNeed, whatWeGet):
-		return whatWeNeed[0][:len(whatWeGet[0])] == whatWeGet[0] and whatWeNeed[1][:len(whatWeGet[1])] == whatWeGet[1]
+	
