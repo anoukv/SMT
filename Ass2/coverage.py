@@ -93,14 +93,11 @@ def coverage(phraseTable1, phraseTable2, n=3):
 			expandable = set(findStart(0, spanDict))
 			
 			# will keep track of the expansion choices for backtracking
-			choices = defaultdict(set)
+			backpointers = defaultdict(set)
 			
 			# keeps track of the things that were expanded
 			expanded = set()
 			
-			# keeps track of where the successes came from
-			succes = defaultdict(set)
-
 			# as long as there are still things to be expanded
 			while len(expandable) > 0:
 				# create new expandable set
@@ -116,17 +113,13 @@ def coverage(phraseTable1, phraseTable2, n=3):
 					# for every found next block
 					for item in new:
 
-						# if this reaches the end of the sequence, it's a succes
-						# and we need to keep track of it
-						if item[1] == (len(p21) -1):
-							succes[item].add(startingPoint)
-
 						# register choosing this block at this point
-						choices[startingPoint].add(item)
-						# if the item has not been expanded, add it to the new expandables
+						backpointers.[item].add(startingPoint)
 						
+						# if the item has not been expanded, add it to the new expandables
 						if item not in expanded:
 							newExpandable.add(item)
+
 				# put newExpandable in expandable
 				expandable = newExpandable
 
