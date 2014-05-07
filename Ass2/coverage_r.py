@@ -27,25 +27,22 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 		
 		queue = allowed[:len(test)]
 
-		if queue == test:
-			return True, 0
-
 		i = len(test)
 		while i < len(allowed):
-			del queue[0]
-			i += 1
-			queue.append(allowed[i])
 			if queue == test:
 				return True, i - len(test)
+			queue.pop(0)
+			i += 1
+			queue.append(allowed[i])
 		return False, -1
 
 	def findStart(start, dict):
-		# return [ tup for tup in dict if tup[0] == start ]
-		returnList = []
-		for tup in dict:
-			if tup[0] == start:
-				returnList.append(tup)
-		return returnList
+		return [ tup for tup in dict if tup[0] == start ]
+		# returnList = []
+		# for tup in dict:
+		# 	if tup[0] == start:
+		# 		returnList.append(tup)
+		# return returnList
 
 	coverage = 0
 	

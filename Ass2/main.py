@@ -138,7 +138,26 @@ def P_joint_e_f(e, f, phrases_f, cocs_f_e):
 	else:
 		return 0
 
+def debug():
+	s_d = [["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]]
+	s_e = [["michael", "assumes", "that", "he", "will", "stay", "in", "the", "house"]]
+	test = [(0, 0), (1, 1), (1, 2), (1, 3), (2, 5), (3, 6), (4, 9), (5, 9), (6, 7), (7, 7), (8, 8)]
+	d = defaultdict(set)
+	for (n,m) in test:
+		d[n].add(m)
+	pairs = zip(s_d, s_e, [d])
+	(phrases_e, phrases_f, cocs_e_f, cocs_f_e) = extract_all_phrases(pairs)
+	print cocs_e_f
+	print
+	print cocs_f_e
+	print
+	print
+
+	assert False, "End of debug"
+
+
 if __name__ == "__main__":
+	debug()
 	print "Reading data..."
 	allignment = read_word_allignment_dicts()
 	s_f = read_sentences_from_file("training/p2_training.nl")
