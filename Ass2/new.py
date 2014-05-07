@@ -47,7 +47,8 @@ def checkConsistency(phrases_e, phrases_d, alignmnent, s_e, s_d):
 							
 							if len(set(phrase_e).intersection(a2)) > 0:
 								phrasePairs.append((getText(phrase_e, s_e), getText(phrase_d, s_d)))
-								 
+								
+
 
 	return phrasePairs
 
