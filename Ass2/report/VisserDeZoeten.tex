@@ -15,11 +15,14 @@
 \tableofcontents
 \newpage
 
-\section{abstract}
-\section{introduction}
-\section{Phrase Extraction and Phrase Translation Probabilites}
+\section{Abstract}
+In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We were also able to train the moses program on a large aligned corpus, although we could not analyse the resulting BLEU performance.
+\section{Introduction}
+
+\section{Phrase Extraction}
+\label{problem}
 Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
-Once we obtain a phrase table, we might wonder how the extracted phrases of one parallel corpus compare to the phrases extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at how may of the phrase pairs are available in the training set phrase table directly or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
+Once we obtain a phrase table, we might wonder how the extracted phrase table of one parallel corpus compare to the phrase table extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at the percentage of phrase pairs directly available in the training set phrase table or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
 %Build an efficient tool for extracting all phrase pairs up to length 4 from a given word aligned training parallel corpus with their joint and conditional (two directional) probability estimates. 
 %Explore the coverage (sparsity) of the phrase table by computing the percentage phrase pairs in a held-out set which 
 %available in the training set phrase table
@@ -41,10 +44,11 @@ There are different ways of estimating the phrase translation probabilities, the
 % also sort of 'possible solutions', right?
 
 \section{Implementation}
-\label{implem}
 In this section we will describe our implementation for the phrase extraction algorithm, as well as the probability estimation algorithm and the algorithm to compute the coverage of the phrase table. 
+
 \subsection{Phrase Extraction}
 \label{implem1}
+Our algorithm first extracts all possible phrases up to length 4 from both the source as well as the target sentence. For every combination of the extracted phrases it will then check whether or not this phrase pair is consistent with the given word alignment. It does so by collecting all the words with which the source sentence as well as the target sentence are aligned. Let $e$ be the target phrase and $f$ be the source phrase. We check for every word in $e$ to which word in $f$ it is aligned according to the given alignment and call the set of found alignments $e_a$. Note that this set corresponds directly to the words in $f$. We do the same for all words in $f$ giving us the set $f_a$. Because $f_a$ and $e_a$ correspond directly to $e$ and $f$ respectively we can determine whether the phrase pair is consistent with the given word alignment by checking if $f_a$ is a subset of $e$ and $e_a$ is a subset of $f$. If this is the case, we conclude that all words in the foreign phrase are aligned to a word in the target phrase (or not aligned at all) and all words in the target phrase are aligned to a word in the source phrase, covering two of the three requirements for consistency. None of the words from either side is aligned to a word that is not in one of the phrase pairs. The last requirement is most easy to meet, at least one word in $f$ as well as $e$ has to be aligned with another word.
 
 \subsection{Probability Estimation}
 \label{implem2}
@@ -62,6 +66,26 @@ $$ p(e, f) = p(f|e) \times p(e) $$
 
 \subsection{Coverage}
 \label{implem2}
+As described in section \ref{problem} there are two ways of computing the coverage of the phrase table extracted from the training data:
+\begin{enumerate}
+\item compute the percentage of phrase pairs in the held-out phrase table that are directly accessible in the phrase table extracted from the training data
+\item compute the percentage of phrase pairs in the held-out phrase table that can be found by concatenating up to $n$ phrase pairs from the phrase table extracted from the training data.
+\end{enumerate}
+The first method is straightforward, so we have tried to come up with an algorithm for computing the coverage that uses the second method. \\\
+Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to two phrases. For every phrase in the 
+
+\begin{figure}
+    \begin{tabular}{l|l|l}
+    John and Sherlock       & 0 - 2 & John and Sherlock solve a crime \\
+    the murderer            & x     & ...                             \\
+    a crime                 & 4 - 5 & ...                             \\
+    solve a crime           & 3 - 5 & ...                             \\
+    Sherlock solve          & 2 - 3 & ~                               \\
+    John and Sherlock solve & 0 - 3 & ~                               \\
+    \end{tabular}
+    \caption{An illustrative example of the coverage-concatenation algorithm.}
+    \label{algorithm}
+\end{figure}
 
 
 \subsection{Efficiency}
@@ -81,6 +105,6 @@ $$ p(e, f) = p(f|e) \times p(e) $$
 
 \subsection{Empirical Evaluation and Coverage}
 
-\section{conclusion}
+\section{Conclusion}
 \bibliography{test}
 \end{document}  
