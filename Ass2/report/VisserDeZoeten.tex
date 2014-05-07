@@ -1,31 +1,58 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}               
+\geometry{a4paper}                
 
-\documentclass[12pt]{amsart}
-\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
-\geometry{a4paper} % or letter or a5paper or ... etc
-% \geometry{landscape} % rotated page geometry
+\bibliographystyle{plain}
 
-% See the ``Article customise'' template for come common customisations
+\title{Statistical Structures in Language Processing - Phrase Extraction}
+\author{Anouk Visser \& R\'emi de Zoeten}
+\date{}                                           % Activate to display a given date or no date
 
-\title{}
-\author{}
-\date{} % delete this line to display the current date
-
-%%% BEGIN DOCUMENT
 \begin{document}
 
 \maketitle
+\newpage
 \tableofcontents
+\newpage
 
 \section{abstract}
 \section{introduction}
-\section{problem description}
-\section{possible solutions}
-\section{selected solution}
-\section{discussion of existing work}
-\section{implementation issues}
+\section{Phrase Extraction and Phrase Translation Probabilites}
+Phrase translation probabilities play an important role in phrase-based statistical machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
+Once we obtain a phrase table, we might wonder how the extracted phrases of one parallel corpus compare to the phrases extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at how may of the phrase pairs are available in the training set phrase table directly or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem} we will discuss both methods, in \ref{eval} we discuss our results.
+%Build an efficient tool for extracting all phrase pairs up to length 4 from a given word aligned training parallel corpus with their joint and conditional (two directional) probability estimates. 
+%Explore the coverage (sparsity) of the phrase table by computing the percentage phrase pairs in a held-out set which 
+%available in the training set phrase table
+%an be built by concatenating (in any order) n>0 phrase pairs from the training set phrase table: it is important to set an upper-bound on n, E.g., n<=3 which makes this more reasonable to execute
+%Given the training data of 100K bilingual sentences, build a phrase-based SMT system using the Moses installation 
+%calculate BLEU scores of the test set  \cite{anouk}
+
+\section{Related work}
+% also sort of 'possible solutions', right?
+
+\section{Implementation}
+\label{implem}
+\subsection{Overview}
+
+\subsection{Implementation details}
+
+\subsection{Efficiency}
+
+% selected solution
+%\section{implementation issues}
 \section{experimental setting}
+
+\subsection{BLEU stuff}
+
+\subsection{Empirical Evaluation and Coverage}
+\label{eval}
+
 \section{results, analyses}
+
+\subsection{BLEU stuff}
+
+\subsection{Empirical Evaluation and Coverage}
+
 \section{conclusion}
-
-
-\end{document}
+\bibliography{test}
+\end{document}  

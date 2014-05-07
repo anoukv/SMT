@@ -1,0 +1,12 @@
+\begin{thebibliography}{1}
+
+\bibitem{anouk}
+{\em test test}.
+\newblock hallo, 2014.
+
+\bibitem{koehn}
+Philipp Koehn.
+\newblock {\em Statistical machine translation}.
+\newblock Cambridge University Press, 2010.
+
+\end{thebibliography}
