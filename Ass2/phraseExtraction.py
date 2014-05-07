@@ -22,8 +22,11 @@ def prettyPrint(phrasePairs, s_e, s_d):
 
 def checkConsistency(phrases_e, phrases_d, alignmnent):
 	phrasePairs = []
+	
+	# find the inverse alignments
 	inverseAlignment = invert_allignment(alignmnent)
 	
+	# for every combination of phrase paris
 	for phrase_e in phrases_e:
 		for phrase_d in phrases_d:
 			
@@ -33,17 +36,22 @@ def checkConsistency(phrases_e, phrases_d, alignmnent):
 			inAlignment_e = False
 			inAlignment_d = False
 
+			# find the words to which all words in phrase_e are aligned and store them in alignment_e
+			# set inAlignment_e to true when at least one alignment is found.
 			for word_e in phrase_e:
 				if word_e in alignmnent:
 					alignment_e = alignment_e.union(alignmnent[word_e])
 					inAlignment_e = True
 
+			# we do the same for the words in phrase_f
 			if inAlignment_e:
 				for word_d in phrase_d:
 					if word_d in inverseAlignment:
 						alignment_d = alignment_d.union(inverseAlignment[word_d])
 						inAlignment_d = True
 
+				# if both phrase pairs had an alignment and the alignments in d are a subset of e and the 
+				# alignments in e are a subset of d (check report for explanation), we have found a phrase pair!
 				if inAlignment_d and alignment_d.issubset(phrase_e) and alignment_e.issubset(phrase_d):
 					phrasePairs.append((phrase_e, phrase_d))
 
@@ -69,6 +77,7 @@ def P_joint_e_f(e, f, phrases_f, cocs_f_e):
 	else:
 		return 0
 
+# accumulates the phrase pairs of the individual sentence
 def generate_tables_from_sentences(triplets):
 	def freqcrement(dic, phrases):
 		for phrase in phrases:
