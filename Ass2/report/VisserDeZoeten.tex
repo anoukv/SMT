@@ -17,6 +17,7 @@
 
 \section{Abstract}
 In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We were also able to train the moses program on a large aligned corpus, although we could not analyse the resulting BLEU performance.
+
 \section{Introduction}
 
 \section{Phrase Extraction}
@@ -52,17 +53,6 @@ Our algorithm first extracts all possible phrases up to length 4 from both the s
 
 \subsection{Probability Estimation}
 \label{implem2}
-We extracted the frequencies of all phrases $p$ in both languages and also the cooccurrences of $f$ and $e$.
-This gave us two frequency tables, \textit{freq\_e} and \textit{freq\_f} and two cooccurrence matrices, \textit{coc\_e\_f} and \textit{coc\_f\_e} where \textit{coc\_e\_f} can be used to look up how often each foreign phrase $f$ cooccurs with a given phrase $e$. 
-
-These tables can be used to estimate the following probabilities:
-
-$$ p(f) = \frac{freq\_f[f] }{  \sum_{f_i \in freq\_f} freq\_f[f_i]  } $$
-$$ p(e) = \frac{freq\_e[e] }{  \sum_{e_i \in freq\_e} freq\_e[e_i]  } $$
-$$ p(f|e) = \frac{coc\_e\_f[e][f]}{ \sum_{f_i \in coc\_e\_f[e]}  coc\_e\_f[e][f_i]} $$
-$$ p(e|f) = \frac{coc\_f\_e[f][e]}{ \sum_{e_i \in coc\_f\_e[f]}  coc\_f\_e[f][e_i]} $$
-$$ p(e, f) = p(e|f) \times p(f) $$
-$$ p(e, f) = p(f|e) \times p(e) $$
 
 \subsection{Coverage}
 \label{implem2}
@@ -72,7 +62,8 @@ As described in section \ref{problem} there are two ways of computing the covera
 \item compute the percentage of phrase pairs in the held-out phrase table that can be found by concatenating up to $n$ phrase pairs from the phrase table extracted from the training data.
 \end{enumerate}
 The first method is straightforward, so we have tried to come up with an algorithm for computing the coverage that uses the second method. \\\
-Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to two phrases. For every phrase in the 
+Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to two phrases. For every phrase in the held-out phrase table (far right) it will find all phrases in the phrase table extracted from the training data (left) that are a subsequence of the phrase in the held-out phrase table and contain only words that are in the held-out phrase, `the murderer' and `Sherlock and John' do not meet this criteria and are therefore discarded (`x'). For the remaining phrases we find the `span' in the phrase that we are looking for. For example `John and Sherlock solve' are the 0th, 1st, 2nd and 3th word of the phrase that we are trying to concatenate, thus resulting in span `0-3'. \\\\
+Our algorithm starts searching for spans that start with a 0 and so it will find `John and Sherlock' and `John and Sherlock solve' first. Next, for every span it has found it will look for the next possible `building blocks' until it has found the goal, which is a span that ends with the length of the phrase we are looking for (-1). For  `John and Sherlock' all spans starting with 3 are considered, the only span that we can find is 3-5 which brings us to our goal. After concatenating $n$ `building blocks' our algorithm abandons its search (in our experiments we set $n=3$).
 
 \begin{figure}
     \begin{tabular}{l|l|l}
@@ -82,8 +73,9 @@ Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we
     solve a crime           & 3 - 5 & ...                             \\
     Sherlock solve          & 2 - 3 & ~                               \\
     John and Sherlock solve & 0 - 3 & ~                               \\
+    Sherlock and John       & x     & ~                               \\
     \end{tabular}
-    \caption{An illustrative example of the coverage-concatenation algorithm.}
+\caption{An illustrative example of the coverage-concatenation algorithm.}
     \label{algorithm}
 \end{figure}
 
