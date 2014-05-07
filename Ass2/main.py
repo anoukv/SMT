@@ -9,12 +9,12 @@ def extract_phrases_from_sentence(sentence, length=4):
 		The function loops over the sentence and maintains a gram of the length last words.
 		Each time a word is added to the gram the state of the gram is used to increment the dictionary.
 	"""
-	def add_gram_to_dic(gram, dic):
+	def add_gram_to_list(gram, l):
 		# This function adds all appropriate sub-grams to the dictionary.
 		for i in xrange(len(gram)):
-			dic[tuple(gram[i:])] += 1
+			l.append(tuple(gram[i:]))
 
-	phrases = defaultdict(int)
+	phrases = []
 	index = 1
 	gram = []
 
@@ -23,7 +23,7 @@ def extract_phrases_from_sentence(sentence, length=4):
 		gram.append((index, sentence.pop(0)))
 		if len(gram) > length: # if gram is over filled
 			gram.pop(0)
-		add_gram_to_dic(gram, phrases)
+		add_gram_to_list(gram, phrases)
 		index += 1
 	return phrases
 
@@ -87,10 +87,12 @@ def extract_all_phrases(sentence_pairs):
 		for key in phrases:
 			dic[key] += 1
 
-	def add_phrases_to_coc(pairs, dic):
+	def add_phrases_to_coc(pairs, dic, reverse=False):
 		# This function adds for all p1 a count to p2.
 		# This effectively registers all the cooccurence counts
 		for (e,f) in pairs:
+			if reverse:
+				(e,f) = (f,e)
 			if e not in dic:
 				dic[e] = defaultdict(int)
 			dic[e][f] += 1
@@ -98,7 +100,8 @@ def extract_all_phrases(sentence_pairs):
 	phrases_f = defaultdict(int) # These are the french sentences
 	phrases_e = defaultdict(int) # These are the english sentences
 
-	cocs = dict() # This contains the cooccurences between phrase pairs.
+	cocs_e_f = dict() # This contains the cooccurences between phrase pairs.
+	cocs_f_e = dict()
 
 	for (sentence_f, sentence_e, allignment) in sentence_pairs:
 		p_f = extract_phrases_from_sentence(sentence_f)
@@ -110,33 +113,58 @@ def extract_all_phrases(sentence_pairs):
 
 		add_phrases_to_dic(phrase_e, phrases_e)
 		add_phrases_to_dic(phrase_f, phrases_f)
-		add_phrases_to_coc(pairs, cocs)
+		add_phrases_to_coc(pairs, cocs_e_f, False)
+		add_phrases_to_coc(pairs, cocs_f_e, True)
 	
-	return (phrases_e, phrases_f, cocs)
+	return (phrases_e, phrases_f, cocs_e_f, cocs_f_e)
 
-def debug():
-	s_e = [['tot', 'slot', 'is', 'er', 'nog', 'het', 'gebrek', 'aan', 'transparantie', '.']]
-	s_f = [['finally', ',', 'there', 'is', 'the', 'lack', 'of', 'transparency', '.']]
-	allignment = [dict({0: set([0]), 1: set([0, 1]), 2: set([3]), 3: set([2]), 5: set([4]), 6: set([5, 6]), 7: set([5]), 8: set([7]), 9: set([8])})]
+def P_e_given_f(e, f, cocs_f_e):
+	if f in cocs_f_e and e in cocs_f_e[f]:
+		freq_e_f = cocs_f_e[f][e]
+		freq_total = sum( cocs_f_e[f].values() )
+		return freq_e_f / float(freq_total)
+	else:
+		return 0
 
-	(phrases_e, phrases_f, cocs) = extract_all_phrases(zip(s_f, s_e, allignment))
-	for e in (phrases_e, phrases_f, cocs):
-		print len(e)
+def P_f_given_e(f, e, cocs_e_f):
+	return P_e_given_f(f, e, cocs_e_f)
 
-	assert False, "Debug ends here"
+def P_joint_e_f(e, f, phrases_f, cocs_f_e):
+	if f in phrases_f:
+		P_of_f = phrases_f[f] / float(sum( phrases_f.values() ))
+		P_of_e_given_f = P_e_given_f(e, f, cocs_f_e)
+		# print "Joining:", P_of_f, "*", P_of_e_given_f
+		return P_of_f * P_of_e_given_f
+	else:
+		return 0
 
 if __name__ == "__main__":
 	print "Reading data..."
 	allignment = read_word_allignment_dicts()
 	s_f = read_sentences_from_file("training/p2_training.nl")
 	s_e = read_sentences_from_file("training/p2_training.en")
+
 	print "Extracting phrases..."
 	start = time()
-	pairs = zip(s_f, s_e, allignment)
-	(phrases_e, phrases_f, cocs) = extract_all_phrases(pairs)
+	pairs = zip(s_f, s_e, allignment)[:1]
+	print pairs[0]
+	(phrases_e, phrases_f, cocs_e_f, cocs_f_e) = extract_all_phrases(pairs)
+	print cocs_e_f
+	print
+	print cocs_f_e
 	stop = time()
 	print "Time: ", int(stop - start + 0.5), "seconds"
-	print len(phrases_f), len(phrases_e), len(cocs), len(pairs)
+
+	print "Stats:\n"
+	print len(pairs), len(phrases_f), len(phrases_e)
+
+	# for i in xrange(0,10):
+	# 	pair = cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0]
+	# 	print "\nPair:", pair
+	# 	print "P(e|f)", P_e_given_f(pair[0], pair[1], cocs_f_e)
+	# 	print "P(f|e)", P_f_given_e(pair[1], pair[0], cocs_e_f)
+	# 	print "Joint:", P_joint_e_f(pair[0], pair[1], phrases_f, cocs_f_e)
+
 
 
 
