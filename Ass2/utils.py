@@ -29,6 +29,14 @@ def read_word_allignment_dicts(filename="training/p2_training_symal.nlen"):
 		dict_content.append(dict(d))
 	return dict_content
 
+def getAllignment(filename):
+	f = open(filename, 'r')
+	content = f.readlines()
+	f.close()
+	content = [ c.replace("\n","").split(" ") for c in content ]
+	content = [ [ tuple(map(int,y.split("-"))) for y in x if y not in ["", " "] ] for x in content ]
+	return content
+
 def invert_allignment(allignment):
 	inv_allignment = defaultdict(set)
 	for key, values in allignment.items():
