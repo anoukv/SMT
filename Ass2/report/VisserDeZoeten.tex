@@ -41,10 +41,11 @@ There are different ways of estimating the phrase translation probabilities, the
 % also sort of 'possible solutions', right?
 
 \section{Implementation}
-\label{implem}
 In this section we will describe our implementation for the phrase extraction algorithm, as well as the probability estimation algorithm and the algorithm to compute the coverage of the phrase table. 
+
 \subsection{Phrase Extraction}
 \label{implem1}
+Our algorithm first extracts all possible phrases up to length 4 from both the source as well as the target sentence. For every combination of the extracted phrases it will then check whether or not this phrase pair is consistent with the given word alignment. It does so by collecting all the words with which the source sentence as well as the target sentence are aligned. Let $e$ be the target phrase and $f$ be the source phrase. We check for every word in $e$ to which word in $f$ it is aligned according to the given alignment and call the set of found alignments $e_a$. Note that this set corresponds directly to the words in $f$. We do the same for all words in $f$ giving us the set $f_a$. Because $f_a$ and $e_a$ correspond directly to $e$ and $f$ respectively we can determine whether the phrase pair is consistent with the given word alignment by checking if $f_a$ is a subset of $e$ and $e_a$ is a subset of $f$. If this is the case, we conclude that all words in the foreign phrase are aligned to a word in the target phrase (or not aligned at all) and all words in the target phrase are aligned to a word in the source phrase, covering two of the three requirements for consistency. None of the words from either side is aligned to a word that is not in one of the phrase pairs. The last requirement is most easy to meet, at least one word in $f$ as well as $e$ has to be aligned with another word.
 
 \subsection{Probability Estimation}
 \label{implem2}
