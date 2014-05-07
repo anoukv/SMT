@@ -6,7 +6,7 @@
 
 \title{Statistical Structures in Language Processing - Phrase Extraction}
 \author{Anouk Visser \& R\'emi de Zoeten}
-\date{}                                           % Activate to display a given date or no date
+\date{} 
 
 \begin{document}
 
@@ -16,6 +16,7 @@
 \newpage
 
 \section{Abstract}
+In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We were also able to train the moses program on a large aligned corpus, although we could not analyse the resulting BLEU performance.
 
 \section{Introduction}
 
@@ -78,9 +79,6 @@ Our algorithm starts searching for spans that start with a 0 and so it will find
     \label{algorithm}
 \end{figure}
 
-
-\subsection{Efficiency}
-
 % selected solution
 %\section{implementation issues}
 \section{Experimental Setting}
@@ -92,10 +90,10 @@ Our algorithm starts searching for spans that start with a 0 and so it will find
 
 \section{Results}
 
-\subsection{BLEU stuff}
-
 \subsection{Empirical Evaluation and Coverage}
 
 \section{Conclusion}
+
 \bibliography{test}
+
 \end{document}  

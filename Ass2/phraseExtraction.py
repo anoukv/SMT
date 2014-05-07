@@ -2,6 +2,8 @@ from collections import defaultdict
 from time import time
 
 from utils import *
+from coverage import coverageSimple
+from coverage_bf import coverage_bf
 
 def extractAllPhrasesUpToLenght(sentence, n=4):
 	phrases = set()
@@ -110,9 +112,17 @@ def generate_tables_from_sentences(triplets):
 
 	return (freqs_e, freqs_d, cocs_e_f, cocs_f_e)
 
+def expand_cocs(coc):
+	expanded = dict()
+	for key1 in coc:
+		for key2 in coc[key1]:
+			expanded[(key1,key2)] = coc[key1][key2]
+	return expanded
+
 if __name__ == "__main__":
 	
 	testMode = False
+	get_coverage = True
 	
 	if testMode:
 		s_d = ["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]
@@ -128,22 +138,35 @@ if __name__ == "__main__":
 		s_e = read_sentences_from_file("heldout/p2_heldout.nl")
 		s_d = read_sentences_from_file("heldout/p2_heldout.en")
 		print "Extracting..."
-		start = time()
-		triplets = zip(s_e, s_d, alignmnentDicts)
-		(freqs_e, freqs_d, cocs_e_f, cocs_f_e) = generate_tables_from_sentences(triplets)
-		stop = time()
-		print "Time:", int(stop-start), "seconds"
-		for i in xrange(10):
-			(e, f) = (cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0])
-			print "\nPair:", (e, f)
-			print "P(e|f) =", P_e_given_f(e, f, cocs_f_e)
-			print "P(f|e) =", P_f_given_e(f, e, cocs_e_f)
-			print "P(e,f) =", P_joint_e_f(e, f, freqs_d, cocs_f_e)
 
-		print len(freqs_e)
-		print len(freqs_d)
-		print len(cocs_e_f)
-		print len(cocs_f_e)
+		if get_coverage:
+			start = time()
+			triplets = zip(s_e, s_d, alignmnentDicts)
+			(_, _, cocs1, _) = generate_tables_from_sentences(triplets[:1])
+			(_, _, cocs2, _) = generate_tables_from_sentences(triplets[1:2])
+			# for i in xrange(10):
+			# 	cocs2.pop(cocs2.keys()[0])
+			cocs1 = expand_cocs(cocs1)
+			cocs2 = expand_cocs(cocs2)
+			stop = time()
+			print coverageSimple(cocs2, cocs1)
+			print coverage_bf(cocs2, cocs1)
+
+		else:
+			start = time()
+			triplets = zip(s_e, s_d, alignmnentDicts)
+			(freqs_e, freqs_d, cocs_e_f, cocs_f_e) = generate_tables_from_sentences(triplets)
+			stop = time()
+			print "Time:", int(stop-start), "seconds"
+
+			for i in xrange(10):
+				(e, f) = (cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0])
+				print "\nPair:", (e, f)
+				print "P(e|f) =", P_e_given_f(e, f, cocs_f_e)
+				print "P(f|e) =", P_f_given_e(f, e, cocs_e_f)
+				print "P(e,f) =", P_joint_e_f(e, f, freqs_d, cocs_f_e)
+
+		
 
 
 

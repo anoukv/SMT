@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 # Computing the coverage
 # assumes that ([1, 2, 3], [3, 4, 5])
 # not sure if this will be like this
@@ -10,7 +12,7 @@ def coverageSimple(phraseTable1, phraseTable2):
 	return numberOfPhrasesInCommon * 100 / float(len(phrases2))
 
 # returns percentage of phrases in phraseTable2 that can be built from phrases in 1
-def coverage(phraseTable1, phraseTable2, configuration_size=3):
+def coverage(phraseTable1, phraseTable2, configuration_size=4):
 
 	# returns True if test only contains elements from allowed, false otherwise
 	def containsOnly(test, allowed):
@@ -22,20 +24,20 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 	# returns true if test is a subsequence of allowed, false otherwise
 	def properSubset(test, allowed):
 		# for debugging later
-		if len(allowed) <= len(test):
+		if len(allowed) < len(test):
 			print "problem 1"
 		
-		queue = allowed[:len(test)]
+		queue = list(allowed[:len(test)])
 
-		if queue == test:
+		if tuple(queue) == test:
 			return True, 0
 
 		i = len(test)
-		while i < len(allowed):
-			del queue[0]
+		while i < len(allowed)-1:
+			queue.pop(0)
 			i += 1
 			queue.append(allowed[i])
-			if queue == test:
+			if tuple(queue) == test:
 				return True, i - len(test)
 		return False, -1
 
@@ -71,14 +73,13 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 				# sequence (what I call a proper subset) of phrase pairs 2
 				if containsOnly(p11, p21) and containsOnly(p12, p22):
 					(status1, index1) = properSubset(p11, p21)
-					(status2, index2) = properSubset(p12, p22) # This can be optimized
+					(status2, index2) = properSubset(p12, p22) # This could be optimized
 					# let's not care about the end point for now...
  					if status1 and status2 and index1 == index2:
  						end1 = index1 + len(p11) - 1
  						end2 = index2 + len(p12) - 1
 						spanDict[(index1, end1)].add((index2, end2))		
 			
-
 			# the set of expandable things, i.e. initially starting points
 			expandable = set(findStart(0, spanDict))
 			
@@ -90,8 +91,10 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 			
 			breakAllLoops = False
 			# as long as there are still things to be expanded
-			for _ in xrange(configuration_size):
-
+			# print "Starting a search."
+			while len(expandable) > 0:
+				# print expandable
+				# print
 				if breakAllLoops:
 					break
 
@@ -117,8 +120,7 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 							coverage += 1
 							break
 						# if the item has not been expanded, add it to the new expandables
-						if item not in expanded:
-							newExpandable.add(item)
+						newExpandable.add(item)
 
 				# put newExpandable in expandable
 				expandable = newExpandable
