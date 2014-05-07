@@ -1,7 +1,7 @@
 # Written by Anouk 
 from utils import *
 
-def doForSentencePair(sentence_e, sentence_f, alignmnent_f_e):
+def doForSentencePair(sentence_e, sentence_f, alignmnent_e_f):
 	
 	for e_start in xrange(len(sentence_e)):
 		for e_end in xrange(e_start, len(sentence_e)):
@@ -12,31 +12,30 @@ def doForSentencePair(sentence_e, sentence_f, alignmnent_f_e):
 			f_end = 0
 			print "Initial f_start, f_end", f_start, f_end
 			
-			for (e, f) in alignmnent_f_e:
+			for (e, f) in alignmnent_e_f:
 				if e_start <= e and e <= e_end:
-					#print "Alignment", (e, f)
+					print "Alignment", (e, f)
 					f_start = min(f, f_start)
 					f_end = max(f, f_end)
 					
-					#print "New f_start, f_end", f_start, f_end
-			#print "Final f_start, f_end", f_start, f_end, "for: e_start, e_end", e_start, e_end
-			extract(f_start, f_end, e_start, e_end, alignmnent_f_e)
+					print "New f_start, f_end", f_start, f_end
+			print "Final f_start, f_end", f_start, f_end, "for: e_start, e_end", e_start, e_end
+			extract(f_start, f_end, e_start, e_end, alignmnent_e_f)
 	return []
 
-def extract(f_start, f_end, e_start, e_end, alignmnent_f_e):
+def extract(f_start, f_end, e_start, e_end, alignmnent_e_f):
 	if f_end == 0:
-		#print "Rejected"
+		print "Rejected"
 		return []
-	for (e, f) in alignmnent_f_e:
+	for (e, f) in alignmnent_e_f:
 		if e < e_start or e > e_end:
-			#print "Rejected"
+			print "Rejected"
 			return []
 	E = []
 	f_s = f_start
 
 	print "Not rejected!", f_start, f_end, e_start, e_end
 	return []
-
 
 if __name__ == "__main__":
 	print "Reading data..."
