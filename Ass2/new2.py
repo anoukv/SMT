@@ -68,13 +68,15 @@ def checkConsistency(phrases_e, phrases_d, alignmnent, s_e, s_d):
 	return phrasePairs
 
 if __name__ == "__main__":
-	s_d = ["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]
-	s_e = ["michael", "assumes", "that", "he", "will", "stay", "in", "the", "house"]
-	alignmnent = [(0, 0), (1, 1), (1, 2), (1, 3), (2, 5), (3, 6), (4, 9), (5, 9), (6, 7), (7, 7), (8, 8)]
+	testMode = True
+	if testMode:
+		s_d = ["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]
+		s_e = ["michael", "assumes", "that", "he", "will", "stay", "in", "the", "house"]
+		alignmnent = [(0, 0), (1, 1), (1, 2), (1, 3), (2, 5), (3, 6), (4, 9), (5, 9), (6, 7), (7, 7), (8, 8)]
 
-	alignmnentDict = defaultdict(set)
-	for (x, y) in alignmnent:
-		alignmnentDict[x].add(y)
+		alignmnentDict = defaultdict(set)
+		for (x, y) in alignmnent:
+			alignmnentDict[x].add(y)
 
 	phrases_e = extractAllPhrasesUpToLenght(s_e)
 	phrases_d = extractAllPhrasesUpToLenght(s_d)
