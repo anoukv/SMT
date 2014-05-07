@@ -113,7 +113,7 @@ def expand_cocs(coc):
 if __name__ == "__main__":
 	
 	testMode = False
-	get_coverage = True
+	get_coverage = False
 	
 	if testMode:
 		s_d = ["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]
@@ -149,8 +149,10 @@ if __name__ == "__main__":
 			(freqs_e, freqs_d, cocs_e_f, cocs_f_e) = generate_tables_from_sentences(triplets)
 			stop = time()
 			print "Time:", int(stop-start), "seconds"
+			for elem in (freqs_e, freqs_d, cocs_e_f, cocs_f_e):
+				print len(elem)
 
-			for i in xrange(10):
+			for i in xrange(0):
 				(e, f) = (cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0])
 				print "\nPair:", (e, f)
 				print "P(e|f) =", P_e_given_f(e, f, cocs_f_e)

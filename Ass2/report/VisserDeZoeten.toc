@@ -10,5 +10,4 @@
 \contentsline {subsection}{\numberline {6.1}BLEU stuff}{6}
 \contentsline {subsection}{\numberline {6.2}Empirical Evaluation and Coverage}{6}
 \contentsline {section}{\numberline {7}Results}{6}
-\contentsline {subsection}{\numberline {7.1}Empirical Evaluation and Coverage}{6}
 \contentsline {section}{\numberline {8}Conclusion}{6}
