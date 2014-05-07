@@ -1,0 +1,29 @@
+\begin{thebibliography}{1}
+
+\bibitem{koehn}
+Philipp Koehn.
+\newblock {\em Statistical machine translation}.
+\newblock Cambridge University Press, 2010.
+
+\bibitem{lexical}
+Philipp Koehn, Franz~Josef Och, and Daniel Marcu.
+\newblock Statistical phrase-based translation.
+\newblock In {\em Proceedings of the 2003 Conference of the North American
+  Chapter of the Association for Computational Linguistics on Human Language
+  Technology-Volume 1}, pages 48--54. Association for Computational
+  Linguistics, 2003.
+
+\bibitem{super}
+Graham Neubig, Taro Watanabe, Eiichiro Sumita, Shinsuke Mori, and Tatsuya
+  Kawahara.
+\newblock Joint phrase alignment and extraction for statistical machine
+  translation.
+\newblock {\em Journal of Information Processing}, 20(2):512--523, 2012.
+
+\bibitem{theother}
+Franz~Josef Och, Christoph Tillmann, Hermann Ney, et~al.
+\newblock Improved alignment models for statistical machine translation.
+\newblock In {\em Proc. of the Joint SIGDAT Conf. on Empirical Methods in
+  Natural Language Processing and Very Large Corpora}, pages 20--28, 1999.
+
+\end{thebibliography}
