@@ -71,8 +71,9 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 				# sequence (what I call a proper subset) of phrase pairs 2
 				if containsOnly(p11, p21) and containsOnly(p12, p22):
 					(status1, index1) = properSubset(p11, p21)
-					(status2, index2) = properSubset(p12, p22) # This can be optimised
- 					if status1 and status2:
+					(status2, index2) = properSubset(p12, p22) # This can be optimized
+					# let's not care about the end point for now...
+ 					if status1 and status2 and index1 == index2:
  						end1 = index1 + len(p11) - 1
  						end2 = index2 + len(p12) - 1
 						spanDict[(index1, end1)].add((index2, end2))		
@@ -84,13 +85,25 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 			# keeps track of the things that were expanded
 			expanded = set()
 			
+			# define the goal
+			goal = len(p21) - 1
+			
+			breakAllLoops = False
 			# as long as there are still things to be expanded
 			for _ in xrange(configuration_size):
 
+				if breakAllLoops:
+					break
+
 				# create new expandable set
 				newExpandable = set()
+				
 				# for every starting point
 				for startingPoint in expandable:
+
+					if breakAllLoops:
+						break
+					
 					# remember that it has been expanded
 					expanded.add(startingPoint)
 					
@@ -99,6 +112,10 @@ def coverage(phraseTable1, phraseTable2, configuration_size=3):
 					
 					# for every found next block
 					for item in new:
+						if item[1] == goal:
+							breakAllLoops = True
+							coverage += 1
+							break
 						# if the item has not been expanded, add it to the new expandables
 						if item not in expanded:
 							newExpandable.add(item)
