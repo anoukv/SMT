@@ -5,6 +5,15 @@ Philipp Koehn.
 \newblock {\em Statistical machine translation}.
 \newblock Cambridge University Press, 2010.
 
+\bibitem{moses}
+Philipp Koehn, Hieu Hoang, Alexandra Birch, Chris Callison-Burch, Marcello
+  Federico, Nicola Bertoldi, Brooke Cowan, Wade Shen, Christine Moran, Richard
+  Zens, et~al.
+\newblock Moses: Open source toolkit for statistical machine translation.
+\newblock In {\em Proceedings of the 45th Annual Meeting of the ACL on
+  Interactive Poster and Demonstration Sessions}, pages 177--180. Association
+  for Computational Linguistics, 2007.
+
 \bibitem{lexical}
 Philipp Koehn, Franz~Josef Och, and Daniel Marcu.
 \newblock Statistical phrase-based translation.

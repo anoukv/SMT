@@ -18,8 +18,6 @@
 \section{Abstract}
 In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We were also able to train the moses program on a large aligned corpus, although we could not analyse the resulting BLEU performance.
 
-\section{Introduction}
-
 \section{Phrase Extraction}
 \label{problem}
 Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
@@ -82,10 +80,13 @@ Our algorithm starts searching for spans that start with a 0 and so it will find
 % selected solution
 %\section{implementation issues}
 \section{Experimental Setting}
+We trained a phrase-based statistical machine translation system on 100K bilingual training sentences. To do so, we used Moses \cite{moses}, an open source toolkit for machine translation. To train the translation system we ran: \begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/scripts/training/train-model.perl 
+-root-dir training -corpus p2_training -f nl -e en -alignment
+grow-diag-final-and -reordering msd-bidirectional-fe -lm
+0:3:/home/bart/project2_data/lm/europarl-v7.nl-en.train.blm.en:8
+-external-bin-dir /apps/smt_tools/alignment/mgizapp-0.7.3/manual-compile
+-mgiza -mgiza-cpus 8\end{verbatim} Resulting in a translation model. 
 
-\subsection{BLEU stuff}
-
-\subsection{Empirical Evaluation and Coverage}
 \label{eval}
 
 \section{Results}
