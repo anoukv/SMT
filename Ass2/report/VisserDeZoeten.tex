@@ -19,9 +19,10 @@
 
 \section{Introduction}
 
-\section{Phrase Extraction and Phrase Translation Probabilites}
+\section{Phrase Extraction}
+\label{problem}
 Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
-Once we obtain a phrase table, we might wonder how the extracted phrases of one parallel corpus compare to the phrases extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at how may of the phrase pairs are available in the training set phrase table directly or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
+Once we obtain a phrase table, we might wonder how the extracted phrase table of one parallel corpus compare to the phrase table extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at the percentage of phrase pairs directly available in the training set phrase table or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
 %Build an efficient tool for extracting all phrase pairs up to length 4 from a given word aligned training parallel corpus with their joint and conditional (two directional) probability estimates. 
 %Explore the coverage (sparsity) of the phrase table by computing the percentage phrase pairs in a held-out set which 
 %available in the training set phrase table
@@ -54,6 +55,26 @@ Our algorithm first extracts all possible phrases up to length 4 from both the s
 
 \subsection{Coverage}
 \label{implem2}
+As described in section \ref{problem} there are two ways of computing the coverage of the phrase table extracted from the training data:
+\begin{enumerate}
+\item compute the percentage of phrase pairs in the held-out phrase table that are directly accessible in the phrase table extracted from the training data
+\item compute the percentage of phrase pairs in the held-out phrase table that can be found by concatenating up to $n$ phrase pairs from the phrase table extracted from the training data.
+\end{enumerate}
+The first method is straightforward, so we have tried to come up with an algorithm for computing the coverage that uses the second method. \\\
+Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to two phrases. For every phrase in the 
+
+\begin{figure}
+    \begin{tabular}{l|l|l}
+    John and Sherlock       & 0 - 2 & John and Sherlock solve a crime \\
+    the murderer            & x     & ...                             \\
+    a crime                 & 4 - 5 & ...                             \\
+    solve a crime           & 3 - 5 & ...                             \\
+    Sherlock solve          & 2 - 3 & ~                               \\
+    John and Sherlock solve & 0 - 3 & ~                               \\
+    \end{tabular}
+    \caption{An illustrative example of the coverage-concatenation algorithm.}
+    \label{algorithm}
+\end{figure}
 
 
 \subsection{Efficiency}

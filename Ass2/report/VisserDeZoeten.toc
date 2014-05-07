@@ -1,11 +1,11 @@
 \contentsline {section}{\numberline {1}Abstract}{3}
 \contentsline {section}{\numberline {2}Introduction}{3}
-\contentsline {section}{\numberline {3}Phrase Extraction and Phrase Translation Probabilites}{3}
+\contentsline {section}{\numberline {3}Phrase Extraction}{3}
 \contentsline {section}{\numberline {4}Related work}{3}
 \contentsline {section}{\numberline {5}Implementation}{4}
 \contentsline {subsection}{\numberline {5.1}Phrase Extraction}{4}
-\contentsline {subsection}{\numberline {5.2}Probability Estimation}{5}
-\contentsline {subsection}{\numberline {5.3}Coverage}{5}
+\contentsline {subsection}{\numberline {5.2}Probability Estimation}{4}
+\contentsline {subsection}{\numberline {5.3}Coverage}{4}
 \contentsline {subsection}{\numberline {5.4}Efficiency}{5}
 \contentsline {section}{\numberline {6}Experimental Setting}{5}
 \contentsline {subsection}{\numberline {6.1}BLEU stuff}{5}
@@ -13,4 +13,4 @@
 \contentsline {section}{\numberline {7}Results}{5}
 \contentsline {subsection}{\numberline {7.1}BLEU stuff}{5}
 \contentsline {subsection}{\numberline {7.2}Empirical Evaluation and Coverage}{5}
-\contentsline {section}{\numberline {8}conclusion}{5}
+\contentsline {section}{\numberline {8}Conclusion}{5}
