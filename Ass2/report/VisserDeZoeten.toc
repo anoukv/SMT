@@ -1,5 +1,5 @@
-\contentsline {section}{\numberline {1}abstract}{3}
-\contentsline {section}{\numberline {2}introduction}{3}
+\contentsline {section}{\numberline {1}Abstract}{3}
+\contentsline {section}{\numberline {2}Introduction}{3}
 \contentsline {section}{\numberline {3}Phrase Extraction and Phrase Translation Probabilites}{3}
 \contentsline {section}{\numberline {4}Related work}{3}
 \contentsline {section}{\numberline {5}Implementation}{4}

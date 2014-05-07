@@ -15,8 +15,10 @@
 \tableofcontents
 \newpage
 
-\section{abstract}
-\section{introduction}
+\section{Abstract}
+
+\section{Introduction}
+
 \section{Phrase Extraction and Phrase Translation Probabilites}
 Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
 Once we obtain a phrase table, we might wonder how the extracted phrases of one parallel corpus compare to the phrases extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at how may of the phrase pairs are available in the training set phrase table directly or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
@@ -71,6 +73,6 @@ Our algorithm first extracts all possible phrases up to length 4 from both the s
 
 \subsection{Empirical Evaluation and Coverage}
 
-\section{conclusion}
+\section{Conclusion}
 \bibliography{test}
 \end{document}  
