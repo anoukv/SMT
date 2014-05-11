@@ -24,8 +24,11 @@ def prettyPrint(phrasePairs, s_e, s_d):
 
 def checkConsistency(phrases_e, phrases_d, alignmnent):
 	phrasePairs = []
+	
+	# find the inverse alignments
 	inverseAlignment = invert_allignment(alignmnent)
 	
+	# for every combination of phrase paris
 	for phrase_e in phrases_e:
 		for phrase_d in phrases_d:
 			
@@ -35,17 +38,22 @@ def checkConsistency(phrases_e, phrases_d, alignmnent):
 			inAlignment_e = False
 			inAlignment_d = False
 
+			# find the words to which all words in phrase_e are aligned and store them in alignment_e
+			# set inAlignment_e to true when at least one alignment is found.
 			for word_e in phrase_e:
 				if word_e in alignmnent:
 					alignment_e = alignment_e.union(alignmnent[word_e])
 					inAlignment_e = True
 
+			# we do the same for the words in phrase_f
 			if inAlignment_e:
 				for word_d in phrase_d:
 					if word_d in inverseAlignment:
 						alignment_d = alignment_d.union(inverseAlignment[word_d])
 						inAlignment_d = True
 
+				# if both phrase pairs had an alignment and the alignments in d are a subset of e and the 
+				# alignments in e are a subset of d (check report for explanation), we have found a phrase pair!
 				if inAlignment_d and alignment_d.issubset(phrase_e) and alignment_e.issubset(phrase_d):
 					phrasePairs.append((phrase_e, phrase_d))
 
@@ -71,6 +79,7 @@ def P_joint_e_f(e, f, phrases_f, cocs_f_e):
 	else:
 		return 0
 
+# accumulates the phrase pairs of the individual sentence
 def generate_tables_from_sentences(triplets):
 	def freqcrement(dic, phrases):
 		for phrase in phrases:
@@ -103,61 +112,77 @@ def generate_tables_from_sentences(triplets):
 
 	return (freqs_e, freqs_d, cocs_e_f, cocs_f_e)
 
-def expand_cocs(coc):
-	expanded = dict()
+def save_cocs(coc, filename):
+	f = open(filename,'w')
 	for key1 in coc:
+		k1 = "".join([ k + " " for k in key1 ])
 		for key2 in coc[key1]:
-			expanded[(key1,key2)] = coc[key1][key2]
-	return expanded
+			k2 = "".join([ k + " " for k in key2 ])
+			f.write(k1 + "||| " + k2 + "\n")
+	f.close()
+
+def cocs_dumb(cocs):
+	total = dict()
+	for key1 in cocs:
+		for key2 in cocs[key1]:
+			total[(key1,key2)] = cocs[key1][key2]
+	return total
+
+def final():
+	print "Heldout..."
+	alignmnentDicts = read_word_allignment_dicts("heldout/p2_heldout_symal.nlen")
+	s_e = read_sentences_from_file("heldout/p2_heldout.nl")
+	s_d = read_sentences_from_file("heldout/p2_heldout.en")
+	triplets = zip(s_e, s_d, alignmnentDicts)
+	(_, _, cocs_h, _) = generate_tables_from_sentences(triplets)
+	print "Training..."
+	alignmnentDicts = read_word_allignment_dicts("training/p2_training_symal.nlen")
+	s_e = read_sentences_from_file("training/p2_training.nl")
+	s_d = read_sentences_from_file("training/p2_training.en")
+	triplets = zip(s_e, s_d, alignmnentDicts)
+	(_, _, cocs_t, _) = generate_tables_from_sentences(triplets)
+	print "Coverage..."
+	cocs_t = cocs_dumb(cocs_t)
+	cocs_h = cocs_dumb(cocs_h)
+	print coverageSimple(cocs_t, cocs_h)
+	print coverageSimple(cocs_h, cocs_t)
+	assert False, "Done"
+
 
 if __name__ == "__main__":
-	
+	final()
 	testMode = False
-	get_coverage = False
+	get_coverage = True
 	
-	if testMode:
-		s_d = ["michael", "geht", "davon", "aus", ",", "dass", "er", "im", "haus", "bleibt"]
-		s_e = ["michael", "assumes", "that", "he", "will", "stay", "in", "the", "house"]
-		alignmnent = [(0, 0), (1, 1), (1, 2), (1, 3), (2, 5), (3, 6), (4, 9), (5, 9), (6, 7), (7, 7), (8, 8)]
-		alignmnentDict = defaultdict(set)
-		for (x, y) in alignmnent:
-			alignmnentDict[x].add(y)
+	print "Reading alignments..."
+	alignmnentDicts = read_word_allignment_dicts("training/p2_training_symal.nlen")
+	print "Reading sentences..."
+	s_e = read_sentences_from_file("training/p2_training.nl")
+	s_d = read_sentences_from_file("training/p2_training.en")
+	print "Extracting..."
+
+	if get_coverage:
+		start = time()
+		triplets = zip(s_e, s_d, alignmnentDicts)
+		(_, _, cocs1, _) = generate_tables_from_sentences(triplets)
+		save_cocs(cocs1, "../../cocs.our")
 	else:
-		print "Reading alignments..."
-		alignmnentDicts = read_word_allignment_dicts("heldout/p2_heldout_symal.nlen")
-		print "Reading sentences..."
-		s_e = read_sentences_from_file("heldout/p2_heldout.nl")
-		s_d = read_sentences_from_file("heldout/p2_heldout.en")
-		print "Extracting..."
+		start = time()
+		triplets = zip(s_e, s_d, alignmnentDicts)
+		(freqs_e, freqs_d, cocs_e_f, cocs_f_e) = generate_tables_from_sentences(triplets)
+		stop = time()
+		print "Time:", int(stop-start), "seconds"
+		for elem in (freqs_e, freqs_d, cocs_e_f, cocs_f_e):
+			print len(elem)
 
-		if get_coverage:
-			start = time()
-			triplets = zip(s_e, s_d, alignmnentDicts)
-			(_, _, cocs1, _) = generate_tables_from_sentences(triplets[:1])
-			(_, _, cocs2, _) = generate_tables_from_sentences(triplets[1:2])
-			# for i in xrange(10):
-			# 	cocs2.pop(cocs2.keys()[0])
-			cocs1 = expand_cocs(cocs1)
-			cocs2 = expand_cocs(cocs2)
-			stop = time()
-			print coverageSimple(cocs2, cocs1)
-			print coverage_bf(cocs2, cocs1)
+		for i in xrange(0):
+			(e, f) = (cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0])
+			print "\nPair:", (e, f)
+			print "P(e|f) =", P_e_given_f(e, f, cocs_f_e)
+			print "P(f|e) =", P_f_given_e(f, e, cocs_e_f)
+			print "P(e,f) =", P_joint_e_f(e, f, freqs_d, cocs_f_e)
 
-		else:
-			start = time()
-			triplets = zip(s_e, s_d, alignmnentDicts)
-			(freqs_e, freqs_d, cocs_e_f, cocs_f_e) = generate_tables_from_sentences(triplets)
-			stop = time()
-			print "Time:", int(stop-start), "seconds"
-			for elem in (freqs_e, freqs_d, cocs_e_f, cocs_f_e):
-				print len(elem)
-
-			for i in xrange(0):
-				(e, f) = (cocs_e_f.keys()[i], cocs_e_f[cocs_e_f.keys()[i]].keys()[0])
-				print "\nPair:", (e, f)
-				print "P(e|f) =", P_e_given_f(e, f, cocs_f_e)
-				print "P(f|e) =", P_f_given_e(f, e, cocs_e_f)
-				print "P(e,f) =", P_joint_e_f(e, f, freqs_d, cocs_f_e)
+	print "Done"
 
 		
 

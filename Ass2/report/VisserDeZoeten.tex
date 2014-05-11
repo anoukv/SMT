@@ -17,10 +17,13 @@
 \tableofcontents
 \newpage
 
-\section{Abstract}
-In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We were also able to train the moses program on a large aligned corpus, although we could not analyse the resulting BLEU performance.
+% /apps/smt_tools/decoders/mosesdecoder/scripts/generic/multi-bleu.perl -lc true.en < translated.en
+% BLEU = 25.05, 60.0/31.7/19.3/12.1 (BP=0.971, ratio=0.971, hyp_len=49033, ref_len=50488)
+% Recall: 0.404304934979
+% Precision: 0.753944232462
 
-\section{Introduction}
+\section{Abstract}
+In this paper we present our findings from Statistical Machine Translation lab session 2. We built an efficient tool for extracting all phrase pairs from an aligned corpus and show how this extraction can be used to derive some probabilities. We were also requested to perform two types of phrase coverage analyses, of which one was successful. We  also trained the moses program on a large aligned corpus and measured the BLEU performance.
 
 \section{Phrase Extraction}
 \label{problem}
@@ -36,15 +39,14 @@ Once we obtain a phrase table, we might wonder how the extracted phrase table of
 \section{Related work}
 In phrase-based machine translation systems we attempt to find an English sentence so that: 
 $$\textit{argmax}_e P(e) \times P(f|e)$$
-To compute $P(f|e)$, in a phrase-based machine translation system we use phrases instead of words. Different methods have been proposed to extract phrase pairs from a parallel corpus in order to estimate the phrase translation probabilities. A very common method is to extract phrase pairs from a word alignment \cite{koehn}\cite{theother}. In this method all phrases for both sentences are considered, but only the phrase pairs that are consistent with the word alignment are extracted. A phrase pair $(f\bar, e\bar)$ is consistent with the word alignment $A$ if
+To compute $P(f|e)$, in a phrase-based machine translation system we use phrases instead of words. Different methods have been proposed to extract phrase pairs from a parallel corpus in order to estimate the phrase translation probabilities. A very common method is to extract phrase pairs from a word alignment \cite{koehn}\cite{theother}. In this method all phrases for both sentences are considered, but only the phrase pairs that are consistent with the word alignment are extracted. A phrase pair $(\bar f,\bar e)$ is consistent with the word alignment $A$ if
 \begin{enumerate}
 \item at least one pair from the alignment occurs in the phrase pair
-\item all words in the foreign phrase aligned to a word in the target phrase or not aligned at all
-\item all words in the target phrase are aligned to a word in the source phrase.
+\item all words in the foreign phrase are aligned to a word that is present in the target phrase or not aligned at all
+\item all words in the target phrase are aligned to a word in the source phrase or not aligned at all.
 \end{enumerate} 
 This method of extracting phrases is closest to our implementation. In \cite{super} a method is proposed based on inversion transduction grammars that reduces the alignment and the extraction step into a single step. \\\\
 There are different ways of estimating the phrase translation probabilities, the simplest way is to calculate the relative frequency. However, other methods have been proposed such as lexical weighting \cite{lexical} where the phrase translation probabilities are estimated by using the conditional probabilities of the words that make up the phrase.
-% also sort of 'possible solutions', right?
 
 \section{Implementation}
 In this section we will describe our implementation for the phrase extraction algorithm, as well as the probability estimation algorithm and the algorithm to compute the coverage of the phrase table. 
@@ -54,7 +56,7 @@ In this section we will describe our implementation for the phrase extraction al
 Our algorithm first extracts all possible phrases up to length 4 from both the source as well as the target sentence. For every combination of the extracted phrases it will then check whether or not this phrase pair is consistent with the given word alignment. It does so by collecting all the words with which the source sentence as well as the target sentence are aligned. Let $e$ be the target phrase and $f$ be the source phrase. We check for every word in $e$ to which word in $f$ it is aligned according to the given alignment and call the set of found alignments $e_a$. Note that this set corresponds directly to the words in $f$. We do the same for all words in $f$ giving us the set $f_a$. Because $f_a$ and $e_a$ correspond directly to $e$ and $f$ respectively we can determine whether the phrase pair is consistent with the given word alignment by checking if $f_a$ is a subset of $e$ and $e_a$ is a subset of $f$. If this is the case, we conclude that all words in the foreign phrase are aligned to a word in the target phrase (or not aligned at all) and all words in the target phrase are aligned to a word in the source phrase, covering two of the three requirements for consistency. None of the words from either side is aligned to a word that is not in one of the phrase pairs. The last requirement is most easy to meet, at least one word in $f$ as well as $e$ has to be aligned with another word.
 
 \subsection{Probability Estimation}
-\label{implem2}
+\label{implem3}
 We extracted the frequencies of all phrases $p$ in both languages and also the cooccurrences of $f$ and $e$.
 This gave us two frequency tables, \textit{freq\_e} and \textit{freq\_f} and two cooccurrence matrices, \textit{coc\_e\_f} and \textit{coc\_f\_e} where \textit{coc\_e\_f} can be used to look up how often each foreign phrase $f$ cooccurs with a given phrase $e$. 
 
@@ -67,6 +69,8 @@ $$ p(e|f) = \frac{coc\_f\_e[f][e]}{ \sum_{e_i \in coc\_f\_e[f]}  coc\_f\_e[f][e_
 $$ p(e, f) = p(e|f) \times p(f) $$
 $$ p(e, f) = p(f|e) \times p(e) $$
 
+These probability functions were implemented.
+
 \subsection{Coverage}
 \label{implem2}
 As described in section \ref{problem} there are two ways of computing the coverage of the phrase table extracted from the training data:
@@ -74,8 +78,8 @@ As described in section \ref{problem} there are two ways of computing the covera
 \item compute the percentage of phrase pairs in the held-out phrase table that are directly accessible in the phrase table extracted from the training data
 \item compute the percentage of phrase pairs in the held-out phrase table that can be found by concatenating up to $n$ phrase pairs from the phrase table extracted from the training data.
 \end{enumerate}
-The first method is straightforward, so we have tried to come up with an algorithm for computing the coverage that uses the second method. \\\
-Our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to two phrases. For every phrase in the held-out phrase table (far right) it will find all phrases in the phrase table extracted from the training data (left) that are a subsequence of the phrase in the held-out phrase table and contain only words that are in the held-out phrase, `the murderer' and `Sherlock and John' do not meet this criteria and are therefore discarded (`x'). For the remaining phrases we find the `span' in the phrase that we are looking for. For example `John and Sherlock solve' are the 0th, 1st, 2nd and 3th word of the phrase that we are trying to concatenate, thus resulting in span `0-3'. \\\\
+The first method is straightforward, so we have also tried to come up with an algorithm for computing the coverage that uses the second method. \\\
+The effects of our algorithm is illustrated in figure \ref{algorithm}, to keep things simple we will just focus on one phrase, but this algorithm can be easily extended to more phrases. For every phrase in the held-out phrase table (far right) it will find all phrases in the phrase table extracted from the training data (left) that are a subsequence of the phrase in the held-out phrase table and contain only words that are in the held-out phrase, `the murderer' and `Sherlock and John' do not meet this criteria and are therefore discarded (`x'). For the remaining phrases we find the `span' in the phrase that we are looking for. For example `John and Sherlock solve' are the 0th, 1st, 2nd and 3th word of the phrase that we are trying to concatenate, thus resulting in span `0-3'. \\\\
 Our algorithm starts searching for spans that start with a 0 and so it will find `John and Sherlock' and `John and Sherlock solve' first. Next, for every span it has found it will look for the next possible `building blocks' until it has found the goal, which is a span that ends with the length of the phrase we are looking for (-1). For  `John and Sherlock' all spans starting with 3 are considered, the only span that we can find is 3-5 which brings us to our goal. After concatenating $n$ `building blocks' our algorithm abandons its search (in our experiments we set $n=3$).
 
 \begin{figure}
@@ -92,28 +96,31 @@ Our algorithm starts searching for spans that start with a 0 and so it will find
     \label{algorithm}
 \end{figure}
 
-% selected solution
-%\section{implementation issues}
+Due to time constraints we were not able to correctly implement the coverage calculations. We have tried various methods which can be reviewed in the attached code, but none of them work properly. We are unsure why this is.
+
 \section{Experimental Setting}
-
-\subsection{BLEU stuff}
-
-\subsection{Empirical Evaluation and Coverage}
 \label{eval}
+We trained a phrase-based statistical machine translation system on 100K bilingual training sentences. To do so, we used Moses \cite{moses}, an open source toolkit for machine translation. To train the translation system we ran: \begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/scripts/training/train-model.perl 
+-root-dir training -corpus p2_training -f nl -e en -alignment
+grow-diag-final-and -reordering msd-bidirectional-fe -lm
+0:3:/home/bart/project2_data/lm/europarl-v7.nl-en.train.blm.en:8
+-external-bin-dir /apps/smt_tools/alignment/mgizapp-0.7.3/manual-compile
+-mgiza -mgiza-cpus 8\end{verbatim} Resulting in a translation model. 
+This model was used for translating using the command: \begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/bin/moses -f model/moses.ini\end{verbatim} 
+Our test sentence gets translated as follows:
+\begin{verbatim}europa bevat veel landen\end{verbatim} 
+\begin{verbatim}there are many countries europe\end{verbatim} 
+We also translated the test set, for which we measured a bleu score of 25.0 agains the gold standard
+\begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/scripts/generic/multi-bleu.perl -lc true.en < translated.en
+BLEU = 25.05, 60.0/31.7/19.3/12.1 (BP=0.971, ratio=0.971, hyp_len=49033, ref_len=50488)\end{verbatim} 
 
 \section{Results}
-We ran our phrase extraction on the smaller 'heldout' dataset and measured how many phrases were extracted and stored in the four different tables that were described in section \ref{implem2}. The following table shows the results:
+We ran our phrase extraction on the 'training' dataset, which resulted in $3901266$ extracted phrase pairs. We also measured the precision and recall against the gold standard, which has $7275046$. The recall was $0.40$ and the precision $0.75$. 
 
-\begin{figure}[H]
-    \begin{tabular}{l|l|l|l}
-    freq\_e  & freq\_f & cocs\_e\_f  & cocs\_f\_e \\
-    117835 & 112893 & 52664 & 49385 \\
-    \end{tabular}
-\caption{Phrase counts}
-\end{figure}
-
+We also calculated the direct phrase coverage of the extracted phrases in the heldout set by the phrases extracted from the training set. This came out at a phrase coverage of $28.56$\%
 
 \section{Conclusion}
+We were able to implement phrase extraction and calculated one measure of phrase coverage. We reported precision and recall of the extracted phrases against the gold standard.
 
 \bibliography{test}
 
