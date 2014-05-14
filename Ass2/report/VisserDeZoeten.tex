@@ -27,7 +27,7 @@ In this paper we present our findings from Statistical Machine Translation lab s
 
 \section{Phrase Extraction}
 \label{problem}
-Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of a phrase pair, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
+Phrase translation probabilities play an important role in phrase-based machine translation systems \cite{koehn}. To be able to compute the joint and (bidirectional) conditional translation probabilities of the phrase pairs, we first need to extract all possible phrase pairs from an aligned training corpus. Although many phrase pairs can be extracted from two parallel sentences, there are only a few that are likely to be each other's translation. In order to limit the number of phrase pairs we extract from the data, we only want to extract phrases that are consistent with the word alignments. A phrase pair is consistent with a word alignment if all words in the source phrase align with a word in the target phrase and vice versa.  In addition to allowing only consistent phrase pairs we will further restrict ourselves to extracting only phrases up to length 4. In section \ref{implem1} and \ref{implem3} we give an overview of how we extracted the phrase pairs and computed their joint and (bidirectional) translation probabilities.\\\\
 Once we obtain a phrase table, we might wonder how the extracted phrase table of one parallel corpus compare to the phrase table extracted from another parallel corpus. In order to explore the coverage of the phrase table extracted from the training data we compute the percentage of phrase pairs in a held-out set which are available in the training set phrase table. We could simply look at the percentage of phrase pairs directly available in the training set phrase table or we could concatenate a number of phrase pairs from the training set to retrieve the phrase pairs in the held-out set. In section \ref{implem2} we will discuss both methods, in \ref{eval} we discuss our results.
 %Build an efficient tool for extracting all phrase pairs up to length 4 from a given word aligned training parallel corpus with their joint and conditional (two directional) probability estimates. 
 %Explore the coverage (sparsity) of the phrase table by computing the percentage phrase pairs in a held-out set which 
@@ -111,11 +111,12 @@ Our test sentence gets translated as follows:
 \begin{verbatim}europa bevat veel landen\end{verbatim} 
 \begin{verbatim}there are many countries europe\end{verbatim} 
 We also translated the test set, for which we measured a bleu score of 25.0 agains the gold standard
-\begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/scripts/generic/multi-bleu.perl -lc true.en < translated.en
+\begin{verbatim}/apps/smt_tools/decoders/mosesdecoder/scripts/generic/multi-bleu.perl -lc true.en \
+< translated.en
 BLEU = 25.05, 60.0/31.7/19.3/12.1 (BP=0.971, ratio=0.971, hyp_len=49033, ref_len=50488)\end{verbatim} 
 
 \section{Results}
-We ran our phrase extraction on the 'training' dataset, which resulted in $3901266$ extracted phrase pairs. We also measured the precision and recall against the gold standard, which has $7275046$. The recall was $0.40$ and the precision $0.75$. 
+We ran our phrase extraction on the 'training' dataset, which resulted in $3901266$ extracted phrase pairs. We also measured the precision and recall against the gold standard, which has $7275046$. The recall was $0.40$ and the precision $0.75$. The higher number of phrases in the gold standard is responsible for the low recall. This happens because in the gold standard phrases with length higher than 4 are taken into account.
 
 We also calculated the direct phrase coverage of the extracted phrases in the heldout set by the phrases extracted from the training set. This came out at a phrase coverage of $28.56$\%
 
