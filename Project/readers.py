@@ -39,7 +39,7 @@ def read_datasets(descriminative=False, development=True, flat=False):
 	"""
 
 	if development:
-		domains = ["legal.dev", "software.dev"]
+		domains = ["legal", "software"]
 	else:
 		domains = ["legal.test", "software.test"]
 

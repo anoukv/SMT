@@ -1,8 +1,6 @@
-from utlist import normalize_vector
+from utils import normalize_vector
 
 from collections import defaultdict
-
-__all__ = [sentences_pairs_as_word_features, sentences_flat_as_word_features]
 
 def sentences_pairs_as_word_features(sentences):
 	pairs = []
@@ -13,6 +11,16 @@ def sentences_pairs_as_word_features(sentences):
 		r = sentences_as_word_features(right, index_dic_r)
 		pairs.append((l,r))
 	return pairs
+
+def sentence_vector(sentence):
+	def get_index(dic, word):
+		if not word in dic:
+			dic[word] = len(dic)
+		return dic[word]
+	feature_vec = defaultdict(int)
+	for word in sentence:
+		feature_vec[word] += 1
+	return dict(normalize_vector(feature_vec))
 
 def sentence_as_feature(sentence, index_dic):
 	def get_index(dic, word):
