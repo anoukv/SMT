@@ -22,7 +22,7 @@ def constructBasicFeatures(sentences, label):
 		
 		#average word lenght
 		features.append(averageWordLenght(sentence))
-		
+		x
 		# lenght of shortest and longest word
 		shortest, longest = shortestLongsetWord(sentence)
 		features.append(shortest)
