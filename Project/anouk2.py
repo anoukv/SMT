@@ -103,9 +103,14 @@ def extractDifferenceProfile(domain, general):
 	
 	return 1
 
-
 if __name__ == "__main__":
 	extractRelativeFrequencyProfile('software')
 	extractRelativeFrequencyProfile('out')
+
+	print "Extracting difference profile"
+	start = time()
 	extractDifferenceProfile('software', 'out')
+	stop = time()
+	print "Extracting difference profile took", int(stop-start+0.5), "seconds."
+
 	
