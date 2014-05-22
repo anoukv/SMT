@@ -23,6 +23,6 @@ if __name__ == "__main__":
 		for tup in sen:
 			profile[tup[1]].add(tup[0])
 
-	prettyPrint(dict(profile))]
+	prettyPrint(dict(profile))
 
 
