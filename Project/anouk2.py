@@ -71,13 +71,41 @@ def extractRelativeFrequencyProfile(corpus):
 
 	return 1
 
+def extractDifferenceProfile(domain, general):
+	
+	domainProfile = shelve.open(domain + "_rf_profile")
+	generalProfile = shelve.open(general + "_rf_profile")
+
+	differenceProfile = dict()
+	
+	if len(domainProfile.keys()) == 0 or len(generalProfile.keys()) == 0:
+		print "The required files were not yet created."
+		return -1
+
+	for tag in domainProfile:
+		differences = dict()
+		if tag in generalProfile:
+			subGeneralProfile = generalProfile[tag]
+			subDomainProfile = domainProfile[tag]
+			for word in subDomainProfile:
+				if word in subGeneralProfile:
+					differences[word] = subDomainProfile[word] - subGeneralProfile[word]
+				else:
+					differences[word] = 1
+		differenceProfile[tag] = differences
+
+	domainProfile.close()
+	generalProfile.close()
+	
+	result = shelve.open(domain + "_difference_profile")
+	result.update(differenceProfile)
+	result.close()
+	
+	return 1
+
+
 if __name__ == "__main__":
 	extractRelativeFrequencyProfile('software')
-	extractRelativeFrequencyProfile('legal')
+	extractRelativeFrequencyProfile('out')
+	extractDifferenceProfile('software', 'out')
 	
-
-
-	# prettyPrint(profile)
-
-
-
