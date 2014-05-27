@@ -53,14 +53,14 @@ def read_datasets(descriminative=False, development=True, flat=False, hype=False
 	out = read_sentences("out", flat, hype)
 	in1 = read_sentences(domains[0], flat, hype)
 	in2 = read_sentences(domains[1], flat, hype)
+	
+	mark_false = lambda x : (False, x)
+	mark_true = lambda x : (True, x)
+	out = map(mark_false, out)
+	in1 = map(mark_true, in1)
+	in2 = map(mark_true, in2)
 
 	if descriminative:
-		mark_false = lambda x : (False, x)
-		mark_true = lambda x : (True, x)
-		out = map(mark_false, out)
-		in1 = map(mark_true, in1)
-		in2 = map(mark_true, in2)
-
 		pos1 = in1[:50000]
 		pos2 = in2[:50000]
 		neg1 = out[:50000]

@@ -54,10 +54,10 @@ def getTaggedCorpus(corpus):
 	return sentences
 
 if __name__ == "__main__":
-	# domain = 'software'
-	# differences = shelve.open("profiles/" + domain + "_difference_profile")
-	# ((mixedLegal, legal), (mixedSoftware, software)) = read_datasets()
-	# print mixedSoftware[1]
+	domain = 'software'
+	differences = shelve.open("profiles/" + domain + "_difference_profile")
+	((mixedLegal, legal), (mixedSoftware, software)) = read_datasets()
+	print mixedSoftware[1]
 	#corpus = getTaggedCorpus(mixedSoftware)
 	#scoredSentences = scoreSentences(corpus, differences)
 	
