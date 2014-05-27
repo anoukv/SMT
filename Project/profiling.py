@@ -1,6 +1,5 @@
 from readers import *
-import nltk as nltk
-from nltk.tag.simplify import simplify_wsj_tag
+from profileUtils import *
 from time import time
 import shelve
 
@@ -48,48 +47,22 @@ def makeProfile(taggedSentences):
 	return profile
 
 # extracts the relative frequency profile from a corpus
-def extractRelativeFrequencyProfile(corpus):
+def extractRelativeFrequencyProfile(corpus, name):
+	print "Extracting relative frequency profile for ", name
 	
 	# read the corpus, extract only the English sentences
-	print "Reading corpus..."
-	start = time()
-	pairs = read_sentences(corpus, False)
-	sents = [list(x[0]) for x in pairs]
-	stop = time()
-	print "Reading corpus took", int(stop-start+0.5), "seconds."
-	
-	print "Tagging corpus..."
-	start = time()
-	
-	sentences = []
-	# for every sentence
-	for sen in sents:
-		# tag the sentence with nltk pos tagger
-		tagged = nltk.pos_tag(sen)
-		# simplify the tagging to simplified POS-tags (see http://www.nltk.org/book/ch05.html)
-		simplified = [(word,  simplify_wsj_tag(tag)) for word, tag in tagged]
-		# append the simplified tagged sentence to sentences
-		sentences.append(simplified)
-
-	stop = time()
-	print "Tagging corpus took", int(stop-start+0.5), "seconds."
+	sentences = getTaggedEnglishCorpus(corpus)
 
 	# create the profile
 	print "Creating profile..."
-	start = time()
 	profile = makeProfile(sentences)
-	stop = time()
-	print "Creating profile took", int(stop-start+0.5), "seconds."
 	
 	# normalize the profile
 	print "Normalizing profile..."
-	start = time()
 	profile = normalizeProfile(profile)
-	stop = time()
-	print "Normalizing profile took", int(stop-start+0.5), "seconds."
 
 	# save the relative frequency profile to the profiles directory
-	result = shelve.open("profiles/" + corpus + "_rf_profile")
+	result = shelve.open("profiles/" + name + "_rf_profile")
 	result.update(profile)
 	result.close()
 
@@ -98,6 +71,8 @@ def extractRelativeFrequencyProfile(corpus):
 # gets the difference profile between the domain and the general relative frequency profiles
 def extractDifferenceProfile(domain, general):
 	
+	print "Extracting difference profile between ", domain, " and ", general
+
 	# get the specific relative frequency profiles
 	domainProfile = shelve.open("profiles/" + domain + "_rf_profile")
 	generalProfile = shelve.open("profiles/" + general + "_rf_profile")
@@ -153,22 +128,23 @@ def extractDifferenceProfile(domain, general):
 
 if __name__ == "__main__":
 	
+	# get data
+	((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True)
+	
+	# get pure legal, software and out
+	legal = filter(lambda x : x[0], legal_mixed)
+	software = filter(lambda x: x[0], legal_mixed)
+	out = filter(lambda x: not x[0], legal_mixed)
+
 	# extract relative frequency profiles
-	extractRelativeFrequencyProfile('software')
-	extractRelativeFrequencyProfile('legal')
-	extractRelativeFrequencyProfile('out')
+	extractRelativeFrequencyProfile(software, 'software')
+	extractRelativeFrequencyProfile(legal, 'legal')
+	extractRelativeFrequencyProfile(out, 'out')
 
 	# extract difference profiles
-	print "Extracting difference profile"
-	start = time()
 	extractDifferenceProfile('software', 'out')
-	stop = time()
-	print "Extracting difference profile took", int(stop-start+0.5), "seconds."
-
-	print "Extracting difference profile"
-	start = time()
 	extractDifferenceProfile('legal', 'out')
-	stop = time()
-	print "Extracting difference profile took", int(stop-start+0.5), "seconds."
+
+	print "Done!"
 
 	
