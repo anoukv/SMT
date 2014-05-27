@@ -1,22 +1,20 @@
 from time import time
 from utils import hypernize_sentence
 
-def read_sentences(filename="legal", flat=False, hype=False):
+def read_sentences(filename="legal", flat=False, ext="", meta_f=(tuple, tuple)):
 	"""
 		Reads sentence pairs a a given domain
 		Returns a list of sentence tuples
 	"""		
 	filename = "../../project3_data/" + filename
 	contents = []
-	t = tuple
-	if hype:
-		t = hypernize_sentence
-	for filename_ in (filename+".en", filename+".es" ):
+
+	for (op, filename_) in zip(meta_f, (filename+".en"+ext, filename+".es"+ext)):
 		f = open(filename_, 'r')
-	 	content = map(lambda y : t(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
+	 	content = map(lambda y : op(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
 	 	f.close()
 	 	contents.append(content)
-	 	t = tuple
+	 	print
 
 	content = zip(contents[0], contents[1])
 	if flat:
@@ -24,7 +22,7 @@ def read_sentences(filename="legal", flat=False, hype=False):
 	else:
 		return content
 
-def read_datasets(descriminative=False, development=True, flat=False, hype=False):
+def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tuple, tuple), ext=""):
 	"""
 		Reads development or test set, for normal or descriminative analises
 		Returns:
@@ -50,9 +48,11 @@ def read_datasets(descriminative=False, development=True, flat=False, hype=False
 	else:
 		domains = ["legal.test", "software.test"]
 
-	out = read_sentences("out", flat, hype)
-	in1 = read_sentences(domains[0], flat, hype)
-	in2 = read_sentences(domains[1], flat, hype)
+	print "  Reading main.."
+	out = read_sentences("out", flat, meta_f, ext)
+	print "  Reading rest.."
+	in1 = read_sentences(domains[0], flat, meta_f, ext)
+	in2 = read_sentences(domains[1], flat, meta_f, ext)
 	
 	mark_false = lambda x : (False, x)
 	mark_true = lambda x : (True, x)
