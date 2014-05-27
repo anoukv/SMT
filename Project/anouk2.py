@@ -1,7 +1,6 @@
 from readers import *
 import nltk as nltk
 from nltk.tag.simplify import simplify_wsj_tag
-from collections import defaultdict
 from time import time
 import shelve
 
@@ -10,13 +9,11 @@ def prettyPrint(dictionary):
 		print key, dictionary[key]
 
 def normalizeProfile(profile):
-	
 	for key in profile:
 		counts = profile[key]
 		total = float(sum(counts.values()))
 		for key in counts:
 			counts[key] = counts[key] / total
-	
 	return profile
 
 def makeProfile(taggedSentences):
@@ -42,13 +39,20 @@ def extractRelativeFrequencyProfile(corpus):
 	print "Reading corpus..."
 	start = time()
 	pairs = read_sentences(corpus, False)
-	sentences = [list(x[0]) for x in pairs]
+	pairs = pairs[1:5]
+	sents = [list(x[0]) for x in pairs]
 	stop = time()
 	print "Reading corpus took", int(stop-start+0.5), "seconds."
 	
 	print "Tagging corpus..."
 	start = time()
-	sentences = [nltk.pos_tag(sen) for sen in sentences]
+	
+	sentences = []
+	for sen in sents:
+		tagged = nltk.pos_tag(sen)
+		simplified = [(word,  simplify_wsj_tag(tag)) for word, tag in tagged]
+		sentences.append(simplified)
+
 	stop = time()
 	print "Tagging corpus took", int(stop-start+0.5), "seconds."
 
@@ -68,6 +72,7 @@ def extractRelativeFrequencyProfile(corpus):
 	result.update(profile)
 	result.close()
 
+	prettyPrint(profile)
 	return 1
 
 def extractDifferenceProfile(domain, general):
