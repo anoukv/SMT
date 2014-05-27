@@ -3,7 +3,6 @@ from nltk.tag.simplify import simplify_wsj_tag
 from time import time
 
 def getTaggedEnglishCorpus(corpus):
-	corpus = corpus[1:500]
 	sents = [list(x[1][0]) for x in corpus]
 	
 	print "Tagging corpus..."

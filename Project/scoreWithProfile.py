@@ -1,9 +1,16 @@
 from readers import *
 from profileUtils import *
+from plotter import *
 import shelve
 
+def getResults(mixedTaggedCorpus, differences):
+	scoredSentences = scoreSentences(mixedSoftwareTagged, differencesSoftware)
+	res = [(scoredSentences[i][0], mixedSoftware[i][0]) for i in xrange(len(scoredSentences))]
+	sortedRes = sorted(res, key = lambda x: x[0], reverse=True)
+	bools = [res[1] for res in sortedRes]
+	return bools	
+
 def scoreSentences(sentences, differences):
-	
 	scoredSentences = []
 	for sen in sentences:	
 		score = 0
@@ -34,19 +41,14 @@ if __name__ == "__main__":
 	# check if the required files were created properly
 	if len(differencesSoftware.keys()) == 0 or len(differencesLegal.keys()) == 0:
 		print "The required files were not yet created."
-	else:
+	
+	else:	
 		((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True)
 		
-		# mixedLegal = getTaggedEnglishCorpus(mixedLegal)
-		mixedSoftware = getTaggedEnglishCorpus(mixedSoftware)
+		mixedLegalTagged = getTaggedEnglishCorpus(mixedLegal)
+		mixedSoftwareTagged = getTaggedEnglishCorpus(mixedSoftware)
+		resSoftware = getResults(mixedSoftwareTagged, differencesSoftware)
+		resLegal = getResults(mixedLegalTagged, differencesLegal)
+		plot_retreival(resSoftware)
 
-		scoredSentences = scoreSentences(mixedSoftware, differencesSoftware)
-		winners = sorted(scoredSentences, key = lambda x: x[0], reverse=True)
-		for winner in winners:
-			print winner
-			print
-	
-	#corpus = getTaggedCorpus(mixedSoftware)
-	#scoredSentences = scoreSentences(corpus, differences)
-	
 	
