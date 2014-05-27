@@ -2,6 +2,7 @@ from readers import read_datasets
 from feature_extraction import sentence_vector
 from utils import vector_distance
 
+
 from random import choice, sample
 from collections import defaultdict
 from math import sqrt
@@ -103,8 +104,11 @@ def NN(verbose=True):
 	def score_sentences(mixed, clusters):
 		def sentence_score((b, vec), clusters):
 			results = [ (x.distance(vec), x.get_class_count()) for x in clusters ]
-			print results
-			(dist, best_batch) = max(results, lambda x : x[0])
+			(dist, best_batch) = (99, None)
+			for (d,bb) in results:
+				if d < dist:
+					dist = d
+					best_batch = bb
 			return (b, best_batch[0] / float(sum(best_batch)) )
 		results = [ sentence_score(s, clusters) for s in mixed ] 
 		return [ x[0] for x in sorted(results, key = lambda x : x[1], reverse=True) ]

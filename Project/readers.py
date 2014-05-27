@@ -1,5 +1,5 @@
 from time import time
-
+from utils import hypernize_sentence
 def read_sentences(filename="legal", flat=False):
 	"""
 		Reads sentence pairs a a given domain
@@ -9,7 +9,7 @@ def read_sentences(filename="legal", flat=False):
 	contents = []
 	for filename_ in (filename+".en", filename+".es" ):
 		f = open(filename_, 'r')
-	 	content = map(lambda y : tuple(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
+	 	content = map(lambda y : hypernize_sentence(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
 	 	f.close()
 	 	contents.append(content)
 
