@@ -1,5 +1,6 @@
 from math import sqrt
 from nltk.corpus import wordnet as wn
+from nltk import pos_tag
 from nltk.stem.wordnet import WordNetLemmatizer 
 wl = WordNetLemmatizer()
 
@@ -19,7 +20,7 @@ def vector_distance(vec1, vec2):
 def hypernize_sentence(sentence):
 	def hypernize(word):
 		try:
-			return wn.synset(wl.lemmatize(word)+".n.01").hypernyms()[0].lexname.split(".")[1]
+			return wn.synsets(wl.lemmatize(word))[0].lexname.split(".")[1]
 		except:
-			return word
+			return wl.lemmatize(word)
 	return tuple(map(hypernize, sentence))
