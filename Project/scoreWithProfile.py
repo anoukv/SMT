@@ -32,9 +32,7 @@ def scoreSentences(sentences, differences):
 		scoredSentences.append((score, sen))
 	return scoredSentences
 
-if __name__ == "__main__":
-	domain = "software"
-	
+if __name__ == "__main__":	
 	differencesSoftware = shelve.open("profiles/software_difference_profile")
 	differencesLegal = shelve.open("profiles/legal_difference_profile")
 
