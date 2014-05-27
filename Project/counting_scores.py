@@ -1,5 +1,7 @@
 from readers import read_datasets
 
+from plotter import plot_retreival
+
 from collections import defaultdict
 
 def get_counting_scores(verbose=True):
@@ -37,6 +39,7 @@ def get_counting_scores(verbose=True):
 
 	print "Loading data..."
 	data = read_datasets(descriminative=True, development=True, flat=True)
+	r = []
 	for (mixed, train) in data:
 		if verbose:
 			print "\tTraining..."
@@ -44,15 +47,18 @@ def get_counting_scores(verbose=True):
 		if verbose:
 			print "\tScoring..."
 		results = score_sentences(mixed, (posW, negW))
+		r.append(results)
 		if verbose:
 			print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
 			print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
 			print
-	return results
+	return tuple(r)
 
 
 
 if __name__ == '__main__':
 	results = get_counting_scores()
+	plot_retreival(map(lambda x : x[0], results[0]))
+	plot_retreival(map(lambda x : x[0], results[1]))
 
 

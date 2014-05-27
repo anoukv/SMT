@@ -1,5 +1,8 @@
 from math import sqrt
-
+from nltk.corpus import wordnet as wn
+from nltk import pos_tag
+from nltk.stem.wordnet import WordNetLemmatizer 
+wl = WordNetLemmatizer()
 
 def normalize_vector(vec):
 	total = sqrt( sum([v**2 for v in vec.values()]) )
@@ -13,3 +16,11 @@ def vector_similarity(vec1, vec2):
 
 def vector_distance(vec1, vec2):
 	return 1 - vector_similarity(vec1, vec2)
+
+def hypernize_sentence(sentence):
+	def hypernize(word):
+		try:
+			return wn.synsets(wl.lemmatize(word))[0].lexname.split(".")[1]
+		except:
+			return wl.lemmatize(word)
+	return tuple(map(hypernize, sentence))

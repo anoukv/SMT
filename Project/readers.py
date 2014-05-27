@@ -1,17 +1,22 @@
 from time import time
+from utils import hypernize_sentence
 
-def read_sentences(filename="legal", flat=False):
+def read_sentences(filename="legal", flat=False, hype=False):
 	"""
 		Reads sentence pairs a a given domain
 		Returns a list of sentence tuples
 	"""		
 	filename = "../../project3_data/" + filename
 	contents = []
+	t = tuple
+	if hype:
+		t = hypernize_sentence
 	for filename_ in (filename+".en", filename+".es" ):
 		f = open(filename_, 'r')
-	 	content = map(lambda y : tuple(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
+	 	content = map(lambda y : t(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
 	 	f.close()
 	 	contents.append(content)
+	 	t = tuple
 
 	content = zip(contents[0], contents[1])
 	if flat:
@@ -19,7 +24,7 @@ def read_sentences(filename="legal", flat=False):
 	else:
 		return content
 
-def read_datasets(descriminative=False, development=True, flat=False):
+def read_datasets(descriminative=False, development=True, flat=False, hype=False):
 	"""
 		Reads development or test set, for normal or descriminative analises
 		Returns:
@@ -36,6 +41,8 @@ def read_datasets(descriminative=False, development=True, flat=False):
 					sentences = a tuple of all words in both languages
 				else:
 					sentences = (english, spanish)
+				if hype:
+					applies hypernize_sentence to english sentences
 	"""
 
 	if development:
@@ -43,9 +50,9 @@ def read_datasets(descriminative=False, development=True, flat=False):
 	else:
 		domains = ["legal.test", "software.test"]
 
-	out = read_sentences("out", flat)
-	in1 = read_sentences(domains[0], flat)
-	in2 = read_sentences(domains[1], flat)
+	out = read_sentences("out", flat, hype)
+	in1 = read_sentences(domains[0], flat, hype)
+	in2 = read_sentences(domains[1], flat, hype)
 
 	if descriminative:
 		mark_false = lambda x : (False, x)
