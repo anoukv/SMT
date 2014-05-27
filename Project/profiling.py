@@ -54,7 +54,6 @@ def extractRelativeFrequencyProfile(corpus):
 	print "Reading corpus..."
 	start = time()
 	pairs = read_sentences(corpus, False)
-	pairs = pairs[1:5]
 	sents = [list(x[0]) for x in pairs]
 	stop = time()
 	print "Reading corpus took", int(stop-start+0.5), "seconds."
@@ -150,7 +149,6 @@ def extractDifferenceProfile(domain, general):
 	result.update(differenceProfile)
 	result.close()
 
-	print differenceProfile
 	return 1
 
 if __name__ == "__main__":
