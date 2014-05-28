@@ -33,21 +33,20 @@ def scoreSentences(sentences, differences):
 	return scoredSentences
 
 if __name__ == "__main__":	
+	
 	differencesSoftwareEN = shelve.open("profiles/software_difference_profile.en")
 	differencesLegalEN = shelve.open("profiles/legal_difference_profile.en")
 	differencesSoftwareES = shelve.open("profiles/software_difference_profile.es")
 	differencesLegalES = shelve.open("profiles/legal_difference_profile.es")
+	
 	# check if the required files were created properly
 	if len(differencesSoftwareEN.keys()) == 0 or len(differencesLegalEN.keys()) == 0 or len(differencesSoftwareES.keys()) == 0 or len(differencesLegalES.keys()) == 0 :
 		print "The required files were not yet created."
 	
 	else:	
-		((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True)
-		
-		mixedLegalTagged = getTaggedEnglishCorpus(mixedLegal)
-		mixedSoftwareTagged = getTaggedEnglishCorpus(mixedSoftware)
-		resSoftware = getResults(mixedSoftwareTagged, differencesSoftware)
-		resLegal = getResults(mixedLegalTagged, differencesLegal)
-		plot_retreival(resSoftware)
+		((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True, tagTuples=True)
+
+		resLegal = getResults(mixedLegal, differencesSoftware)
+		resSoftware = getResults(mixedSoftware, differencesLegal)
 
 	
