@@ -1,7 +1,7 @@
 from time import time
 from utils import hypernize_sentence
 
-def read_sentences(filename="legal", flat=False, ext="", meta_f=(tuple, tuple)):
+def read_sentences(filename="legal", flat=False, meta_f=(tuple, tuple), ext=""):
 	"""
 		Reads sentence pairs a a given domain
 		Returns a list of sentence tuples
@@ -75,7 +75,7 @@ def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tu
 
 if __name__ == '__main__':
 	start = time()
-	read_datasets(True, True, True)
+	read_datasets()
 	stop = time()
 	print stop - start
 
