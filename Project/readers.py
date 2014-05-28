@@ -22,7 +22,7 @@ def read_sentences(filename="legal", flat=False, meta_f=(tuple, tuple), ext=""):
 	else:
 		return content
 
-def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tuple, tuple), ext=""):
+def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tuple, tuple), ext="", tagTuples=False):
 	"""
 		Reads development or test set, for normal or descriminative analises
 		Returns:
@@ -48,11 +48,16 @@ def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tu
 	else:
 		domains = ["legal.test", "software.test"]
 
-	print "  Reading main.."
-	out = read_sentences("out", flat, meta_f, ext)
-	print "  Reading rest.."
-	in1 = read_sentences(domains[0], flat, meta_f, ext)
-	in2 = read_sentences(domains[1], flat, meta_f, ext)
+	if readTagTuples:
+		out = readTagTuples(filename="out")
+		in1 = readTagTuples(filename=domains[0])
+		in2 = readTagTuples(filename=domains[1])
+	else:
+		print "  Reading main.."
+		out = read_sentences("out", flat, meta_f, ext)
+		print "  Reading rest.."
+		in1 = read_sentences(domains[0], flat, meta_f, ext)
+		in2 = read_sentences(domains[1], flat, meta_f, ext)
 	
 	mark_false = lambda x : (False, x)
 	mark_true = lambda x : (True, x)
@@ -84,11 +89,10 @@ def readTagTuples(filename="legal"):
 		tagTuples.append((en, es))
 	return tagTuples
 
-
-
 if __name__ == '__main__':
 	start = time()
-	read_datasetsTAGS()
+	((x, y), (z, p)) =  read_datasets(tagTuples=True)
+	print p[0]
 	stop = time()
 	print stop - start
 

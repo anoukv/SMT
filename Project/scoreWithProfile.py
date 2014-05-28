@@ -33,11 +33,12 @@ def scoreSentences(sentences, differences):
 	return scoredSentences
 
 if __name__ == "__main__":	
-	differencesSoftware = shelve.open("profiles/software_difference_profile")
-	differencesLegal = shelve.open("profiles/legal_difference_profile")
-
+	differencesSoftwareEN = shelve.open("profiles/software_difference_profile.en")
+	differencesLegalEN = shelve.open("profiles/legal_difference_profile.en")
+	differencesSoftwareES = shelve.open("profiles/software_difference_profile.es")
+	differencesLegalES = shelve.open("profiles/legal_difference_profile.es")
 	# check if the required files were created properly
-	if len(differencesSoftware.keys()) == 0 or len(differencesLegal.keys()) == 0:
+	if len(differencesSoftwareEN.keys()) == 0 or len(differencesLegalEN.keys()) == 0 or len(differencesSoftwareES.keys()) == 0 or len(differencesLegalES.keys()) == 0 :
 		print "The required files were not yet created."
 	
 	else:	
