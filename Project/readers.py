@@ -75,7 +75,8 @@ def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tu
 
 if __name__ == '__main__':
 	start = time()
-	read_datasets(True, True, True)
+	print read_sentences()[0]
+	print read_sentences(ext=".pos")[0]
 	stop = time()
 	print stop - start
 
