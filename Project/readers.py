@@ -1,7 +1,7 @@
 from time import time
 from utils import hypernize_sentence
 
-def read_sentences(filename="legal", flat=False, ext="", meta_f=(tuple, tuple)):
+def read_sentences(filename="legal", flat=False, meta_f=(tuple, tuple), ext=""):
 	"""
 		Reads sentence pairs a a given domain
 		Returns a list of sentence tuples
@@ -73,10 +73,22 @@ def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tu
 		mixed2 = out + in2[:50000]
 		return ((mixed1, in1[50000:]), (mixed2, in2[50000:]))
 
+def readTagTuples(filename="legal"):
+	sentences = read_sentences(filename=filename)
+	posTags = read_sentences(filename=filename, ext=".pos")
+	tagTuples = []
+	for i, pair in enumerate(sentences):
+		pos = posTags[i]
+		en = zip(pair[0], pos[0])
+		es = zip(pair[1], pos[1])
+		tagTuples.append((en, es))
+	return tagTuples
+
+
+
 if __name__ == '__main__':
 	start = time()
-	print read_sentences()[0]
-	print read_sentences(ext=".pos")[0]
+	read_datasetsTAGS()
 	stop = time()
 	print stop - start
 
