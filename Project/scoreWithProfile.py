@@ -1,36 +1,36 @@
 from readers import *
-from profileUtils import *
 from plotter import *
 import shelve
 
-def getResults(mixedTaggedCorpus, differences):
-	scoredSentences = scoreSentences(mixedSoftwareTagged, differencesSoftware)
-	res = [(scoredSentences[i][0], mixedSoftware[i][0]) for i in xrange(len(scoredSentences))]
-	sortedRes = sorted(res, key = lambda x: x[0], reverse=True)
-	bools = [res[1] for res in sortedRes]
-	return bools	
-
-def scoreSentences(sentences, differences):
-	scoredSentences = []
-	for sen in sentences:	
+def score(sentence, differences):
+	score = 0
+	for word, tag in sentence:
+		if tag in differences:
+			counting = differences[tag]
+			if word in counting:
+				score+=counting[word]
+	if score <= 0:
 		score = 0
-		for word, tag in sen:
-			if tag in differences:
-				counting = differences[tag]
-				if word in counting:
-					score += counting[word]
+	else:
+		score = score / float(sen(sentence))
 
-		# if the score is smaller than 0, readjust to zero
-		if score <= 0:
-			score = 0
+	return score
+
+def scoreSentences(sentences, differencesEN, differencesES):
+	results = []
+	for sentencePair in sentences:
+		bool = sentencePair[0]
+		en = sentencePair[1][0]
+		es = sentencePair[1][1]
 		
-		# otherwise, normalize
-		else:
-			score = score / float(len(sen))
+		scoreEN = score(en, differencesEN)
+		scoreES = score(es, differencesES)
 
-		# add tuple score, taggedSentence to scoredSentences
-		scoredSentences.append((score, sen))
-	return scoredSentences
+		score = (scoreEN + scoreES) / float(2)
+
+		results.append((bool, score))
+	resultsSorted = sorted(results, key = lambda x: x[1], reverse=True)
+	return resultsSorted
 
 if __name__ == "__main__":	
 	
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 	else:	
 		((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True, tagTuples=True)
 
-		resLegal = getResults(mixedLegal, differencesSoftware)
-		resSoftware = getResults(mixedSoftware, differencesLegal)
+		resLegal = scoreSentences(mixedLegal, differencesSoftwareEN, differencesSoftwareES)
+		resSoftware = scoreSentences(mixedSoftware, differencesLegalEN, differencesLegalES)
 
 	

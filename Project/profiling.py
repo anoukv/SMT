@@ -1,5 +1,4 @@
 from readers import *
-from profileUtils import *
 from time import time
 import shelve
 
