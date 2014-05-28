@@ -38,7 +38,7 @@ def get_counting_scores(verbose=True):
 		return sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
-	data = read_datasets(descriminative=True, development=True, flat=True)
+	data = read_datasets(descriminative=True, development=True, flat=True, ext=".pos")
 	r = []
 	for (mixed, train) in data:
 		if verbose:

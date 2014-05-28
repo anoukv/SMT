@@ -47,14 +47,15 @@ def read_datasets(descriminative=False, development=True, flat=False, meta_f=(tu
 	else:
 		domains = ["legal.test", "software.test"]
 
-	if readTagTuples:
+	if tagTuples:
+		print "hallo"
 		out = readTagTuples(filename="out")
 		in1 = readTagTuples(filename=domains[0])
 		in2 = readTagTuples(filename=domains[1])
 	else:
-		print "  Reading main.."
+		print "\tReading main.."
 		out = read_sentences("out", flat, meta_f, ext)
-		print "  Reading rest.."
+		print "\tReading rest.."
 		in1 = read_sentences(domains[0], flat, meta_f, ext)
 		in2 = read_sentences(domains[1], flat, meta_f, ext)
 	
