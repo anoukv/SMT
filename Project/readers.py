@@ -14,7 +14,6 @@ def read_sentences(filename="legal", flat=False, meta_f=(tuple, tuple), ext=""):
 	 	content = map(lambda y : op(y.replace("\n","").split(" ")), filter(lambda x : len(x) > 1, f.readlines()))
 	 	f.close()
 	 	contents.append(content)
-	 	print
 
 	content = zip(contents[0], contents[1])
 	if flat:
