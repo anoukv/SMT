@@ -1,5 +1,4 @@
 from readers import *
-from profileUtils import *
 from time import time
 import shelve
 
@@ -50,32 +49,37 @@ def makeProfile(taggedSentences):
 def extractRelativeFrequencyProfile(corpus, name):
 	print "Extracting relative frequency profile for ", name
 	
-	# read the corpus, extract only the English sentences
-	sentences = getTaggedEnglishCorpus(corpus)
-
+	english = [sen[1][0] for sen in corpus]
+	spanish = [sen[1][1] for sen in corpus]
 	# create the profile
 	print "Creating profile..."
-	profile = makeProfile(sentences)
+	profileEnglish = makeProfile(english)
+	profileSpanish = makeProfile(spanish)
 	
 	# normalize the profile
 	print "Normalizing profile..."
-	profile = normalizeProfile(profile)
+	profileEnglish = normalizeProfile(profileEnglish)
+	profileSpanish = normalizeProfile(profileSpanish)
 
 	# save the relative frequency profile to the profiles directory
-	result = shelve.open("profiles/" + name + "_rf_profile")
-	result.update(profile)
-	result.close()
+	resultEnglish = shelve.open("profiles/" + name + "_rf_profile.en")
+	resultEnglish.update(profileEnglish)
+	resultEnglish.close()
+
+	resultSpanish = shelve.open("profiles/" + name + "_rf_profile.es")
+	resultSpanish.update(profileSpanish)
+	resultSpanish.close()
 
 	return 1
 
 # gets the difference profile between the domain and the general relative frequency profiles
-def extractDifferenceProfile(domain, general):
+def extractDifferenceProfile(domain, general, language):
 	
 	print "Extracting difference profile between ", domain, " and ", general
 
 	# get the specific relative frequency profiles
-	domainProfile = shelve.open("profiles/" + domain + "_rf_profile")
-	generalProfile = shelve.open("profiles/" + general + "_rf_profile")
+	domainProfile = shelve.open("profiles/" + domain + "_rf_profile." + language)
+	generalProfile = shelve.open("profiles/" + general + "_rf_profile." + language)
 
 	# initite empty dictionary for difference profile
 	differenceProfile = dict()
@@ -120,20 +124,19 @@ def extractDifferenceProfile(domain, general):
 	generalProfile.close()
 	
 	# save the result
-	result = shelve.open("profiles/" + domain + "_difference_profile")
+	result = shelve.open("profiles/" + domain + "_difference_profile." + language)
 	result.update(differenceProfile)
 	result.close()
 
 	return 1
 
 if __name__ == "__main__":
-	
 	# get data
-	((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True)
+	((mixedLegal, legal_mixed), (mixedSoftware, software_mixed)) = read_datasets(descriminative=True, tagTuples=True)
 	
 	# get pure legal, software and out
 	legal = filter(lambda x : x[0], legal_mixed)
-	software = filter(lambda x: x[0], legal_mixed)
+	software = filter(lambda x: x[0], software_mixed)
 	out = filter(lambda x: not x[0], legal_mixed)
 
 	# extract relative frequency profiles
@@ -142,8 +145,10 @@ if __name__ == "__main__":
 	extractRelativeFrequencyProfile(out, 'out')
 
 	# extract difference profiles
-	extractDifferenceProfile('software', 'out')
-	extractDifferenceProfile('legal', 'out')
+	extractDifferenceProfile('software', 'out', 'en')
+	extractDifferenceProfile('legal', 'out', 'en')
+	extractDifferenceProfile('software', 'out', 'es')
+	extractDifferenceProfile('legal', 'out', 'es')
 
 	print "Done!"
 
