@@ -1,5 +1,4 @@
 from time import time
-from utils import hypernize_sentence
 
 def read_sentences(filename="legal", flat=False, meta_f=(tuple, tuple), ext=""):
 	"""

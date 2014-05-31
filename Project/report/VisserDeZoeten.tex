@@ -2,7 +2,8 @@
 \usepackage{geometry} 
 \usepackage{graphicx}
 \usepackage{float}
-\geometry{a4paper}                
+\geometry{a4paper}
+      
 
 \bibliographystyle{plain}
 
@@ -20,14 +21,23 @@
 \section{Abstract}
 HY
 
-\section{Section 1}
-\label{problem}
-Section 1 body
+\section{Introduction}
+\label{sec:intro}
+The performance of a statistical machine translation systems is dependent on the data that is used to train the model. For accurate translations it is useful to base the model on training data that matches the domain where the machine translation will be applied. When translating a text about software, ideally, the sentences in the training corpus should be cherry picked from the software domain. 
+In this work we investigate how to extract in-domain sentences from a large mixed-domain training corpus. We develop and evaluate several methods to order the set of training sentences based on the estimated likelihood that the sentence pair is in-domain. The top-$n$ sentences are then used for training and evaluating a translation system and comparing the performance to a system that is trained with $n$ sentence pairs that were randomly selected from the mixed-domain corpus.
+The paper is organised as follows. Section \ref{sec:related} describes related work, section \ref{sec:methods} explains the different methods that we have used for sentence-reordering, section \ref{sec:results} shows the performance of our methods in terms of sentence-reordering ability and the effects this has on translation performance, and finally we end with some concluding remarks \ref{sec:conclusion}.
+
+\section{Related work}
+\label{sec:related}
+
+\section{Methods for mixed domain re-ordering}
+\label{sec:methods}
 
 \section{Results}
-Nice pictures
+\label{sec:results}
 
 \section{Conclusion}
+\label{sec:conclusion}
 We did good.
 
 \bibliography{test}

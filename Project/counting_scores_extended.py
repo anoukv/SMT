@@ -1,8 +1,8 @@
 from readers import read_datasets
-from plotter import plot_retreival
+# from plotter import plot_retreival
 from collections import defaultdict
 from math import sqrt
-import sys
+from time import time
 
 def normalizeString(vec):
 	vec = [ float(x) for x in vec]
@@ -12,56 +12,56 @@ def normalizeString(vec):
 		new_vec.append(v/total)
 	return tuple(new_vec)
 
-def load_vectors(filename):
-	print "Loading word projections"
+def load_vectors(filename, maxx=20000):
+	print "\tLoading projections..."
 	f = open(filename,'r')
 	f.readline()
 	content = [ filter( lambda x : not x in ["\n",""], l.replace("\n", "").split(" ")) for l in f.readlines() ]
+	if len(content) > maxx:
+		content = content[:maxx]
 	content = [ (l[0], normalizeString(l[1:])) for l in content ]
 	content = filter(lambda x : not x[1] == None, content)
 	words = dict()
 	for (word, vector) in content:
 		words[word.lower()] = vector
-
-	print "Done!"
 	return words
 
-def findMostSimilarWords(vectors, word, top=10):
-	if word in vectors:
+def addToLimitSet(sett,word,score):
+	sett.append((word,score))
+	sett.sort(key=lambda tup: tup[1], reverse=True )
+	sett.pop()
+
+def findMostSimilarWords(vectors, word, top, cache):
+	if word in cache:
+		return cache[word]
+	elif word in vectors:
 		wordRepresentation = vectors[word]
 		dim = len(wordRepresentation)
-		mostSimilar = [(0, None) for i in xrange(top)]
+		mostSimilar = [(None, -1) for _ in xrange(top)]
 		for wordvector in vectors:
 			if wordvector != word:
 				rep = vectors[wordvector]
 				sim = sum([wordRepresentation[i] * rep[i] for i in xrange(dim)])
-				filled = False
-				for i in xrange(top):
-					if (sim > mostSimilar[i][0] or mostSimilar == None) and filled == False:
-						for j in xrange(top):
-							index = top - 1 -j
-							if index > i:
-								mostSimilar[index] = mostSimilar[index-1]
-						mostSimilar[i] = (sim, wordvector)
-						filled = True
-		return map(lambda x: x[1], mostSimilar)
+				addToLimitSet(mostSimilar, wordvector, sim)
+		mostSimilar = tuple(map(lambda x: x[1], mostSimilar))
+		cache[word] = mostSimilar
+		return mostSimilar
 	else:
 		return []
 
-def extendSentence(sentence, vectors, top):
-	print sentence
+def extendSentence(sentence, vectors, top, cache):
 	extendedSentence = []
 	for word in sentence:
-		new = findMostSimilarWords(vectors, word, top)
+		new = findMostSimilarWords(vectors, word, top, cache)
 		extendedSentence.append(word)
 		for extraWord in new:
 			extendedSentence.append(extraWord)
-	print extendedSentence
 	return extendedSentence
 
 def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
-	def get_frequency_counts(train, vectorsEnglish, vectorsSpanish):
-		top = 5
+	cache = dict()
+	def get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache):
+		top = 3
 		posW = defaultdict(int)
 		negW = defaultdict(int)
 		for (inset, sentence) in train:
@@ -70,21 +70,21 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 			else:
 				dic = negW
 			
-			sentenceEn = extendSentence(sentence[0], vectorsEnglish, top)
-			sentenceEs = extendSentence(sentence[1], vectorsSpanish, top)
+			sentenceEn = extendSentence(sentence[0], vectorsEnglish, top, cache)
+			sentenceEs = extendSentence(sentence[1], vectorsSpanish, top, cache)
 			sentenceBoth = sentenceEn + sentenceEs
 			for word in sentenceBoth:
 				dic[word] += 1
 		return (dict(posW), dict(negW))
 
-	def score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish):
+	def score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache):
 		results = []
 		top = 5
 		for (b, sentence) in mixed:
 			net = 0
 			
-			sentenceEn = extendSentence(sentence[0], vectorsEnglish, top)
-			sentenceEs = extendSentence(sentence[1], vectorsSpanish, top)
+			sentenceEn = extendSentence(sentence[0], vectorsEnglish, top, cache)
+			sentenceEs = extendSentence(sentence[1], vectorsSpanish, top, cache)
 			
 			sentenceBoth = sentenceEn + sentenceEs
 			
@@ -110,10 +110,10 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 	for (mixed, train) in data:
 		if verbose:
 			print "\tTraining..."
-		(posW, negW) = get_frequency_counts(train, vectorsEnglish, vectorsSpanish)
+		(posW, negW) = get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache)
 		if verbose:
 			print "\tScoring..."
-		results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish)
+		results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache)
 		r.append(results)
 		if verbose:
 			print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
@@ -121,24 +121,23 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 			print
 	return tuple(r)
 
-
-
 if __name__ == '__main__':
-	if not len(sys.argv) == 3:
-		print "USAGE: "
-		print "python counting_scores_extended.py <PATH TO WORDVECOTRS_EN> <PATH TO WORDVECOTRS_ES>"
-		sys.exit()
-	else:
+	start = time()
+	pathEnglish = "../../project3_data/wordvectors.en"
+	pathSpanish = "../../project3_data/wordvectors.es"
 
-		pathEnglish = sys.argv[1]
-		pathSpanish = sys.argv[2]
+	vectorsEnglish = load_vectors(pathEnglish)
+	vectorsSpanish = load_vectors(pathSpanish)
 
-		vectorsEnglish = load_vectors(pathEnglish)
-		vectorsSpanish = load_vectors(pathSpanish)
-		
-		results = get_counting_scores(vectorsEnglish, vectorsSpanish)
-		
-		plot_retreival(map(lambda x : x[0], results[0]))
-		plot_retreival(map(lambda x : x[0], results[1]))
+	results = get_counting_scores(vectorsEnglish, vectorsSpanish)
+
+	stop = time()
+	print "Time:", int(stop - start + 0.5)
+	f = open('results_counting_scores_extended_3_200000.py', 'w')
+	f.write("results = " + str(results))
+	f.close()
+	
+	# plot_retreival(map(lambda x : x[0], results[0]))
+	# plot_retreival(map(lambda x : x[0], results[1]))
 
 
