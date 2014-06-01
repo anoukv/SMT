@@ -1,6 +1,6 @@
 from readers import read_datasets
 
-from plotter import plot_retreival
+from plotter import plot_r
 
 from collections import defaultdict
 
@@ -32,7 +32,7 @@ def get_counting_scores(verbose=True):
 					score = posW[word] / float(posW[word]+negW[word])
 					
 				pos += score
-			results.append((b, pos/float(len(sentence)+1)))
+			results.append((b, pos/float(len(sentence)+3)))
 		return sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
@@ -56,7 +56,6 @@ def get_counting_scores(verbose=True):
 
 if __name__ == '__main__':
 	results = get_counting_scores()
-	plot_retreival(map(lambda x : x[0], results[0]))
-	plot_retreival(map(lambda x : x[0], results[1]))
+	plot_r(results)
 
 

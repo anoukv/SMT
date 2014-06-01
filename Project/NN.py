@@ -1,12 +1,11 @@
 from readers import read_datasets
 from feature_extraction import sentence_vector
 from utils import vector_distance
-from plotter import plot_retreival
+# from plotter import plot_retreival
 
 from random import choice, sample
 from collections import defaultdict
 from math import sqrt
-from multiprocessing import Pool
 from time import time
 
 class cluster:
@@ -59,7 +58,7 @@ class cluster:
 		self.elements_set = set(self.center.keys())
 		return diff
 
-def kmeans_process(data, k=100, min_dist_change=0.01, max_iter=8):
+def kmeans_process(data, k=100, min_dist_change=0.001, max_iter=8):
 	def kmeans(data, k, min_dist_change=10, max_iter=8):
 		clusters = dict()
 
@@ -126,10 +125,10 @@ def NN(verbose=True):
 	for (mixed, train) in data:
 		if verbose:
 			print "\tTraining..."
-		train = sample(train, len(train)/50)
+		train = sample(train, len(train)/10)
 		if verbose:
 			print "\t\tTraining set size:", len(train)
-		clusters = kmeans_process(train, 8)
+		clusters = kmeans_process(train, 4)
 		if verbose:
 			print "\tScoring..."
 		results = score_sentences(mixed, clusters)
@@ -143,6 +142,10 @@ def NN(verbose=True):
 	return tuple(r)
 
 if __name__ == '__main__':
+
 	results = NN()
-	plot_retreival(map(lambda x : x[0], results[0]))
-	plot_retreival(map(lambda x : x[0], results[1]))
+	f = open('results_NN_10_4.py', 'w')
+	f.write("results = " + str(results))
+	f.close()
+	# plot_retreival(map(lambda x : x[0], results[0]))
+	# plot_retreival(map(lambda x : x[0], results[1]))

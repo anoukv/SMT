@@ -58,10 +58,9 @@ def extendSentence(sentence, vectors, top, cache):
 			extendedSentence.append(extraWord)
 	return extendedSentence
 
-def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
+def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True, top=5):
 	cache = dict()
-	def get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache):
-		top = 5
+	def get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache, top):
 		posW = defaultdict(int)
 		negW = defaultdict(int)
 		for (inset, sentence) in train:
@@ -77,31 +76,26 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 				dic[word] += 1
 		return (dict(posW), dict(negW))
 
-	def score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache):
+	def score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache, top):
 		results = []
-		top = 5
 		for (b, sentence) in mixed:
-			net = 0
-			
 			sentenceEn = extendSentence(sentence[0], vectorsEnglish, top, cache)
 			sentenceEs = extendSentence(sentence[1], vectorsSpanish, top, cache)
-			
 			sentenceBoth = sentenceEn + sentenceEs
 			
-			for word in sentenceBoth:
+			pos = 0
+			for word in sentence:
 				if word not in posW and word not in negW:
-					score = 0
+					score = 0.5
 				elif word in posW and word not in negW:
 					score = 1
 				elif word not in posW and word in negW:
-					score = -1
+					score = 0
 				else:
-					total = float(posW[word]+negW[word])
-					score = 2 * (max(posW[word], negW[word]) / total - 0.5)
-					if posW[word] < negW[word]:
-						score = -score
-				net += score
-			results.append((b, net/float(len(sentence))))
+					score = posW[word] / float(posW[word]+negW[word])
+					
+				pos += score
+			results.append((b, pos/float(len(sentence)+2)))
 		return sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
@@ -110,10 +104,10 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 	for (mixed, train) in data:
 		if verbose:
 			print "\tTraining..."
-		(posW, negW) = get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache)
+		(posW, negW) = get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache, top)
 		if verbose:
 			print "\tScoring..."
-		results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache)
+		results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache, top)
 		r.append(results)
 		if verbose:
 			print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
@@ -129,11 +123,11 @@ if __name__ == '__main__':
 	vectorsEnglish = load_vectors(pathEnglish)
 	vectorsSpanish = load_vectors(pathSpanish)
 
-	results = get_counting_scores(vectorsEnglish, vectorsSpanish)
+	results = get_counting_scores(vectorsEnglish, vectorsSpanish, top=2)
 
 	stop = time()
 	print "Time:", int(stop - start + 0.5)
-	f = open('results_counting_scores_extended_3_200000.py', 'w')
+	f = open('results_wbs_2_2_20000.py', 'w')
 	f.write("results = " + str(results))
 	f.close()
 	

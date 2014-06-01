@@ -4,7 +4,7 @@ from sklearn import svm as sk_svm
 
 from readers import read_datasets
 
-from plotter import plot_retreival
+from plotter import plot_r
 
 from collections import defaultdict
 
@@ -29,7 +29,6 @@ def data_to_svm_input(data):
 
 	data = tuple(new_data)
 	dic_len = len(dic)
-	print dic_len
 
 	# Get a vector for every sentence and split boolean and vector
 	new_data = []
@@ -84,7 +83,6 @@ def go():
 
 if __name__ == '__main__':
 	results = go()
-	plot_retreival(map(lambda x : x[0], results[0]))
-	plot_retreival(map(lambda x : x[0], results[1]))
+	plot_r(results)
 
 

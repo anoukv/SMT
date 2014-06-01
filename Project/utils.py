@@ -1,8 +1,8 @@
 from math import sqrt
-from nltk.corpus import wordnet as wn
-from nltk import pos_tag
-from nltk.stem.wordnet import WordNetLemmatizer 
-wl = WordNetLemmatizer()
+# from nltk.corpus import wordnet as wn
+# from nltk import pos_tag
+# from nltk.stem.wordnet import WordNetLemmatizer 
+# wl = WordNetLemmatizer()
 
 def normalize_vector(vec):
 	total = sqrt( sum([v**2 for v in vec.values()]) )
