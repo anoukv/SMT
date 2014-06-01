@@ -61,7 +61,7 @@ def extendSentence(sentence, vectors, top, cache):
 def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True):
 	cache = dict()
 	def get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache):
-		top = 3
+		top = 5
 		posW = defaultdict(int)
 		negW = defaultdict(int)
 		for (inset, sentence) in train:

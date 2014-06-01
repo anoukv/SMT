@@ -1,7 +1,7 @@
 from readers import read_datasets
 from feature_extraction import sentence_vector
 from utils import vector_distance
-
+from plotter import plot_retreival
 
 from random import choice, sample
 from collections import defaultdict
@@ -129,7 +129,7 @@ def NN(verbose=True):
 		train = sample(train, len(train)/50)
 		if verbose:
 			print "\t\tTraining set size:", len(train)
-		clusters = kmeans_process(train, 32)
+		clusters = kmeans_process(train, 8)
 		if verbose:
 			print "\tScoring..."
 		results = score_sentences(mixed, clusters)
@@ -144,4 +144,5 @@ def NN(verbose=True):
 
 if __name__ == '__main__':
 	results = NN()
-
+	plot_retreival(map(lambda x : x[0], results[0]))
+	plot_retreival(map(lambda x : x[0], results[1]))

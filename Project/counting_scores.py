@@ -20,25 +20,23 @@ def get_counting_scores(verbose=True):
 	def score_sentences(mixed, (posW, negW)):
 		results = []
 		for (b, sentence) in mixed:
-			net = 0
+			pos = 0
 			for word in sentence:
 				if word not in posW and word not in negW:
-					score = 0
+					score = 0.5
 				elif word in posW and word not in negW:
 					score = 1
 				elif word not in posW and word in negW:
-					score = -1
+					score = 0
 				else:
-					total = float(posW[word]+negW[word])
-					score = 2 * (max(posW[word], negW[word]) / total - 0.5)
-					if posW[word] < negW[word]:
-						score = -score
-				net += score
-			results.append((b, net/float(len(sentence))))
+					score = posW[word] / float(posW[word]+negW[word])
+					
+				pos += score
+			results.append((b, pos/float(len(sentence)+1)))
 		return sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
-	data = read_datasets(descriminative=True, development=True, flat=True, ext=".pos")
+	data = read_datasets(descriminative=True, development=True, flat=True, ext="")
 	r = []
 	for (mixed, train) in data:
 		if verbose:

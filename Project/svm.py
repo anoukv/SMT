@@ -1,6 +1,6 @@
 from pattern.en import tag as tagEN
 from pattern.es import tag as tagES
-import sklearn
+from sklearn import svm as sk_svm
 
 from readers import read_datasets
 
@@ -8,83 +8,76 @@ from plotter import plot_retreival
 
 from collections import defaultdict
 
-def train(sentences):
+def data_to_svm_input(data):
+	print "\t\tConverting sentences to vectors..."
+	dic = dict()
 	def get_index(tag, tag_dic):
 		if not tag in tag_dic:
 			tag_dic[tag] = len(tag_dic)
 		return tag_dic[tag]
 
-	new_sentences = []
-	dic = dict()
-	for (b, sent) in sentences:
-		new_sentences.append((b, map(lambda x : get_index(x,dic), sent)))
-	sentences = new_sentences
+	# Get a number for every postag
+	new_data = []
+	for pair in data:
+		mt = []
+		for sentences in pair:
+			new_sentences = []
+			for (b, sent) in sentences:
+				new_sentences.append((b, map(lambda x : get_index(x, dic), sent)))
+			mt.append(new_sentences)
+		new_data.append(tuple(mt))
 
+	data = tuple(new_data)
 	dic_len = len(dic)
-	X = []
-	Y = []
-	for (b, sent) in sentences:
-		if b:
-			X.append(1)
-		else:
-			X.append(0)
+	print dic_len
 
-		weight = 1/float(len(sent))
-		s = [ 0 for _ in xrange(dic_len)]
-		for n in sent:
-			s[n] += weight
-		s.append(len(sent))
-		Y.append(s)
+	# Get a vector for every sentence and split boolean and vector
+	new_data = []
+	for pair in data:
+		mt = []
+		for sentences in pair:
+			X = []
+			y = []
+			for (b, sent) in sentences:
+				if b:
+					y.append(1)
+				else:
+					y.append(0)
+				s = [ 0 for _ in xrange(2*dic_len)]
+				for n in sent:
+					s[n] += 1
+				X.append(s)
+			mt.append((X,y))
+		new_data.append(tuple(mt))
 
-	SVM = sklearn.svm.LinearSVC(tol=0.1)
-	SVM.fit(X,Y)
+	return tuple(new_data)
+
+def train_svm((X,y)):
+	print "\t\tFinding support vectors..."
+	SVM = sk_svm.LinearSVC(tol=0.001)
+	# SVM = sk_svm.SVC(kernel='poly')
+	SVM.fit(X,y)
 	return SVM
 
-def score_sentences(SVM, mixed):
-	results = map(lambda x : (x[0], SVM.decision_function(x[1])), mixed)
+def score_sentences((X,y), SVM):
+	results = []
+	for (b,s) in zip(y,X):
+		results.append((b,SVM.decision_function(s)))
 	return sorted(results, key = lambda x : x[1], reverse=True)
-
-
-def tag_sentence(sentence, tagger, app):
-	try:
-		return map(lambda x : x[1]+app, tagger("".join( [ x + " " for x in sentence ] )) )
-	except:
-		return [ str(len(sentence)) + app ]
-
-def prepare_data(((mixed1, train1), (mixed2, train2))):
-	sets = []
-	for v in (mixed1, train1, mixed2, train2):
-		vv = []
-		for (b, (e,s)) in v:
-			new = map(lambda x : tag_sentence(x, tagEN, "_en"), e) + map(lambda x : tag_sentence(x, tagES, "_es"), s)
-			vv.append((b, new))
-		sets.append(vv)
-
-	return ((sets[0], sets[1]), (sets[2], sets[3]))
-
-def meta_f_en(sentence):
-	return map(lambda x : tag_sentence(x, tagEN, "_en"), sentence)
-
-def meta_f_es(sentence):
-	return map(lambda x : tag_sentence(x, tagEN, "_es"), sentence)
 
 def go():
 	print "Loading data..."
-	# data = prepare_data(read_datasets(descriminative=True, development=True, flat=False))
-	data = read_datasets(descriminative=True, development=True, flat=True, meta_f=(meta_f_en, meta_f_es))
+	data = data_to_svm_input(read_datasets(descriminative=True, development=True, flat=True, ext=".pos"))
 	r = []
 	for (mixed, train) in data:
-		if verbose:
-			print "\tTraining..."
-		SVM = train(train)
-		if verbose:
-			print "\tScoring..."
+		print "\tTraining..."
+		SVM = train_svm(train)
+		print "\tScoring..."
 		results = score_sentences(mixed, SVM)
 		r.append(results)
-		if verbose:
-			print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
-			print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
-			print
+		print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
+		print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
+		print
 	return tuple(r)
 
 

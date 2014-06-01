@@ -32,6 +32,45 @@ The paper is organised as follows. Section \ref{sec:related} describes related w
 
 \section{Methods for mixed domain re-ordering}
 \label{sec:methods}
+Our data consists of English-Spanish sentence pairs in the software domain, legal domain and out-domain.
+The training data consists of $50.000$ sentence pairs for each of the three domains.
+Our test data consists of an out-domain dataset of $400.000$ sentences, which is combined with $50.000$ in-domain sentences to create two sets of $450.000$ sentence pairs that need to be ranked according to their relevance to the domain.
+
+\subsection{Clustering and nearest neighbour}
+For this method we first extract the frequencies of all words in the sentence pairs and represent them as a sparse vector of unit length. We then cluster all sentences based on their vector representations. The cluster centres are the relative frequencies of the words of all sentences that are assigned to the cluster. Clusters represent a mixture of in and out-domain sentences.To determine if a given sentence is in or out-domain we find the cluster who's centre has the greatest cosine similarity with the sentence. The probability that a sentence is in-domain is then defined as the number of in-domain sentences that are assigned to the cluster divided by the total number of sentences assigned to the cluster:
+
+$$ P(in|C{entre}) = \frac{|C_{in}|}{|C_{in}| + |C_{out}|} $$
+
+The clustering is done with just 8 cluster centres. Although the probability estimate might be more accurate when more cluster centres are used we did not experiment with cluster sizer larger than 8 because of the computational cost.
+
+\subsection{Support vector machine}
+Our intuition is that the part-of-speech (pos) tag distribution gives clues about the domain that the sentence is from. For example, in the legal domain there is the sentence:
+\textit{With regard to those countries , the UN went as far as to adopt what is referred to as a no action motion .}
+In the software domain there is the sentence \textit{The frame analysis settings are applicable on a per document basis .}
+These in-domain sentences are somewhat typical while the out-domain sentences can really be any kind of sentence.
+
+To test if these pos-tags hold information about the domain that they come from we represented each sentence as a histogram of pos-tags and trained a linear support vector machine to classify if a sentence is in or out domain. Spanish and English pos-tags were assigned to different bins, and together we observed $76$ pos-tags.
+
+\subsection{Word-based scoring}
+In this method every word in a sentence will provide evidence independent evidence that the sentence is in, or out domain. The words in both the in and out-domain set are counted and using these counts the probability that a given word belongs to an in-domain sentence can be estimated. Let \textit{pos} be a map \textit{word} $\rightarrow$ \textit{word-frequency} that maps a word to the number of times it has been observed in the positive set and \textit{neg} a similar map to retrieve the number of times a word has been observed in the negative set.
+The estimated probability of a sentence $s$ being in the positive set given one word $w$ from the sentence is then defined as:
+
+\begin{equation} \label{eq:simple}
+P(s\in positive | w) = \frac{pos[w]}{pos[w] + neg[w]}
+\end{equation}
+
+If the above probability is undefined (\textit{pos} + \textit{neg} $= 0$) then $P(s\in positive | w)$ is set to $0.5$.
+
+Now the probability of $P(s\in positive | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in positive | w)$ have not been smoothed as would be common in natural language processing. We chose instead collect 'evidence scores' for both hypothesis $s\in positive$ and $s\in negative$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
+
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} P(s\in positive | w) + \sum_{w\in s} P(s\in negative | w)}  \end{equation}
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} [ P(s\in positive | w) + P(s\in negative | w) ]}  \end{equation}
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | }  \end{equation}
+
+We then introduced the tuneable parameter $C$ which significantly improves our results in our expiriments:
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | + C}  \end{equation}
+
+\subsubsection{Extended weighted scoring}
 
 \section{Results}
 \label{sec:results}
