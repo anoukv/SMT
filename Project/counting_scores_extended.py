@@ -84,7 +84,7 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True, top=5):
 			sentenceBoth = sentenceEn + sentenceEs
 			
 			pos = 0
-			for word in sentence:
+			for word in sentenceBoth:
 				if word not in posW and word not in negW:
 					score = 0.5
 				elif word in posW and word not in negW:
@@ -95,7 +95,7 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True, top=5):
 					score = posW[word] / float(posW[word]+negW[word])
 					
 				pos += score
-			results.append((b, pos/float(len(sentence)+2)))
+			results.append((b, pos/float(len(sentenceBoth)+2)))
 		return sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."

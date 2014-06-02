@@ -62,7 +62,9 @@ def plot_results(sequence1, sequence2, total=None):
 
 if __name__ == '__main__':
 	print "Loading.."
-	from results_counting_scores_extended_3_200000 import results
+	from results_NN_50_8 import results
+	
+	results = (sorted(results[0], key = lambda x : x[1], reverse=True), sorted(results[1], key = lambda x : x[1], reverse=True))
 	print "Plotting.."
 	s1 = map(lambda x : x[0], results[0])
 	s2 = map(lambda x : x[0], results[1])

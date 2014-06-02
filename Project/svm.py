@@ -5,6 +5,7 @@ from sklearn import svm as sk_svm
 from readers import read_datasets
 
 from plotter import plot_r
+from results_to_files import save_results
 
 from collections import defaultdict
 
@@ -66,7 +67,8 @@ def score_sentences((X,y), SVM):
 
 def go():
 	print "Loading data..."
-	data = data_to_svm_input(read_datasets(descriminative=True, development=True, flat=True, ext=".pos"))
+	original_data = read_datasets(descriminative=True, development=True, flat=True, ext=".pos")
+	data = data_to_svm_input(original_data)
 	r = []
 	for (mixed, train) in data:
 		print "\tTraining..."
@@ -77,12 +79,13 @@ def go():
 		print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
 		print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
 		print
-	return tuple(r)
+	return tuple(r), original_data
 
 
 
 if __name__ == '__main__':
-	results = go()
+	results, original_data = go()
+	save_results(results, filename="svm_results")
 	plot_r(results)
 
 
