@@ -28,21 +28,9 @@ The performance of a statistical machine translation systems is dependent on the
 In this work we investigate how to extract in-domain sentences from a large mixed-domain training corpus. We develop and evaluate several methods to order the set of training sentences based on the estimated likelihood that the sentence pair is in-domain. The top-$n$ sentences are then used for training and evaluating a translation system and comparing the performance to a system that is trained with $n$ sentence pairs that were randomly selected from the mixed-domain corpus.
 The paper is organised as follows. Section \ref{sec:related} describes related work, section \ref{sec:methods} explains the different methods that we have used for sentence-reordering, section \ref{sec:results} shows the performance of our methods in terms of sentence-reordering ability and the effects this has on translation performance, and finally we end with some concluding remarks \ref{sec:conclusion}.
 
-
-\section{Related Work}
-\label{sec:related}
-In order to improve the performance of statistical machine translation, a lot of research is done in the area of domain adaptation. Through domain adaptation we would like to improve the performance of an SMT system on one specific domain. However, as the performance of an SMT system depends on the amount of training data, we cannot simply train the model with in-domain data only. In domain adaptation one can choose to work on the corpus level, i.e. discard data from a general domain corpus that is not closely related to the domain or on the model level, where we could for example interpolate a general translation model and an in-domain translation model. In “Domain Adaptation via Pseudo In-Domain Data Selection” the authors work both on the corpus leven and on the model level. To discard data from the general domain corpus, the authors use three simple cross-entropy based models: cross-entropy, cross-entropy difference and bilingual cross-entropy. Cross-entropy and cross-entropy difference were both proposed by Moore and Lewis 2010, presented in “Intelligent Selection of Language Model Training Data”, in this paper the authors conclude that X. In “Domain adaptation”, it turns out that X. In addition to this, the authors note that the bilingual cross-entropy outperforms all methods. However, they find that all three models are not necessarily good at retrieving the actual in-domain sentences from the general-domain corpus, but instead they extract what they call pseudo in-domain data that has a different distribution compared to the actual in-domain data. 
-
-Another approach to domain adaptation for SMT is presented in “Language Model Adaptation for Statistical Machine Translation with Sturctured Query Models” in which the authors pose the data selection problem as an information retrieval problem. Using an initial language model they train an SMT system and let the system translate the sentence creating multiple hypotheses. Next, they use the hypotheses as queries on the general domain corpus to retrieve sentences that could enhance translation performance because they are similar to the in-domain corpus. Using these sentences they train their final translation model. The queries can be bag of words from one or multiple hypotheses, or can be structured queries, which preserve the order of the words in the sentence. The authors find that the structured query model works best, preserving word order information while extracting sentences from a general domain corpus improves performance. In their paper the authors note that this process can be performed iteratively. 
-
-We represent X new domain adaptation model at corpus level. As noted in “Pseudo” it is computationally less expensive to filter a corpus than to train multiple translation systems. Our approach is focused towards retrieving the in-domain sentences from a general domain corpus. As found in “Pseudo” using cross-entropy methods will not necessarily result in retrieving the in-domain sentences. Therefore, we have devised several new methods that focus on X. 
-As in “Query” who use hypotheses to retrieve relevant sentences, we will be exploring methods that will expand the sentences that we have with similar words.
-
-
 \section{Methods for mixed domain re-ordering}
 \label{sec:methods}
-Our data consists of English-Spanish sentence pairs in the software domain, legal domain and out-domain.
-The training data consists of $50.000$ sentence pairs for each of the three domains.
+Our data consists of English-Spanish sentence pairs in the software domain ($100.000$ sentence pairs), legal domain ($100.000$ sentence pairs) and out-domain ($450.000$ sentence pairs). The training data consists of $50.000$ sentence pairs for the software domain and the legal domain, as well as $50.000$ sentence pairs from the out-domain dataset.
 Our test data consists of an out-domain dataset of $400.000$ sentences, which is combined with $50.000$ in-domain sentences to create two sets of $450.000$ sentence pairs that need to be ranked according to their relevance to the domain.
 
 \subsection{Clustering and nearest neighbour}
@@ -63,7 +51,7 @@ To test if these pos-tags hold information about the domain that they come from 
 \begin{table*}[t]
     \begin{tabular}{|l|l|l|l|l|l|}
     \hline
-    Method & parameters & Software | Recall at 50.000  & Legal | Recall at 50.000 \\ \hline
+    Method & parameters & Legal | Recall at 50.000  & Software | Recall at 50.000 \\ \hline
     NN      & 4, 10          & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
     NN      & 8, 10          & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
     SVM      & N.A.          & 24021 - 48.0\%  & 13333 - 27.7\%        \\ \hline
@@ -78,16 +66,17 @@ To test if these pos-tags hold information about the domain that they come from 
 
 
 \subsection{Word-based scoring}
+\label{wbs}
 In this method every word in a sentence will provide evidence independent evidence that the sentence is in, or out domain. The words in both the in and out-domain set are counted and using these counts the probability that a given word belongs to an in-domain sentence can be estimated. Let \textit{pos} be a map \textit{word} $\rightarrow$ \textit{word-frequency} that maps a word to the number of times it has been observed in the positive set and \textit{neg} a similar map to retrieve the number of times a word has been observed in the negative set.
 The estimated probability of a sentence $s$ being in the positive set given one word $w$ from the sentence is then defined as:
 
 \begin{equation} \label{eq:simple}
-P(s\in positive | w) = \frac{pos[w]}{pos[w] + neg[w]}
+P(s\in pos | w) = \frac{pos[w]}{pos[w] + neg[w]}
 \end{equation}
 
 If the above probability is undefined (\textit{pos} + \textit{neg} $= 0$) then $P(s\in positive | w)$ is set to $0.5$.
 
-Now the probability of $P(s\in positive | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in positive | w)$ have not been smoothed as would be common in natural language processing. We chose instead to collect 'evidence scores' for both hypothesis $s\in positive$ and $s\in negative$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
+Now the probability of $P(s\in pos | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in pos | w)$ have not been smoothed as would be common in natural language processing. We chose instead to collect 'evidence scores' for both hypothesis $s\in pos$ and $s\in neg$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
 
 \begin{dmath} P(s\in pos | s)  = \\ \frac{\sum_{w\in s} P(s\in pos | w)}{\sum_{w\in s} P(s\in pos | w) + \sum_{w\in s} P(s\in neg | w)} \end{dmath}
 
@@ -101,13 +90,24 @@ We then introduced the tuneable parameter $C$ which significantly improves our r
 
 
 \subsubsection{Extended weighted scoring}
-We implemented an extension to the word-based scoring method, where every sentence gets expanded. The sentence is expanded by adding to every word in the sentence the $E$ most similar words. We used the \textit{word to vec} method and implementation by [REF] and trained on the union of the training set and set that needs to be split in order to obtain a vector representation of every word that occurs more than $5$ times. The wordvectors are $320$ real numbers and can be used to define word similarity by the cosine similarity of their wordvector representations. 
-This sentence expansion is used as a pre-processing step before applying the above described word-based scoring method, and does not affect anything to the basic word-based scoring method when $E = 0$.
+We implemented an extension to the word-based scoring method, where every sentence gets expanded. The sentence is expanded by adding the $E$ most similar words to every word in the sentence. We used the \textit{word2vec} toolkit \cite{word2vec} which we trained on the union of all available training corpora (i.e. $100.000 + 100.000 + 450.000 = 650.000$ sentences). Different vector representations were created for English and Spanish and only words that occurred more than five times were represented. The resulting 320-dimensional word vector representations can be used to define word similarity by computing the cosine similarity of the vector representations. 
+Before applying the word-based scoring method described in section \ref{wbs} the sentences are extended by finding the $E$ most similar words for the words in the sentence. When $E=0$ the basic word-based scoring method is not affected.
 
 \section{Results}
 \label{sec:results}
 We present the results of our three different methods with different parameters in the following table, and in graphs. We chose to report recall at $50.000$ because out of the $450.000$ sentences that are re-ordered, $50.000$ are in-domain. 
 
+
+\section{Related Work and Discussion}
+\label{sec:related}
+In domain adaptation one can choose to work on the corpus level, i.e. discard data from a general domain corpus that is not closely related to the domain or on the model level, where we could for example interpolate a general translation model and an in-domain translation model. Smart data selection can be seen as domain adaptation on the corpus level. 
+
+In \cite{pseudo} the authors explore domain adaptation on both the corpus and the model level. To select data from a general domain corpus three simple cross-entropy based models are used: cross-entropy, cross-entropy difference and bilingual cross-entropy. Cross-entropy and cross-entropy difference were both proposed by \cite{intelligent}, they showed that using data selected by using cross-entropy produced better language models that were trained on less data, compared to random data selection. In \cite{pseudo}, it is further concluded that in addition to better language models, using cross-entropy for more intelligent data selection also results in a higher BLEU score in a trained SMT. In addition to this, the authors also present the performance of cords-entropy difference and bilingual cross-entropy and conclude that selecting data by using bilingual cross-entropy outperforms the other methods. However, although the BLEU scores increase using cross-entropy for data selection, it turns out that the three models are not necessarily good at retrieving the actual in-domain sentences from the general-domain corpus. Instead so-called pseudo in-domain data is extracted from the general domain corpus, which has a different distribution than actual in-domain data. Because of this, we have decided not to use cross-entropy for data selection, as our approach is focused towards retrieving actual in-domain sentences from a general domain corpus.
+
+Another approach to domain adaptation for SMT is presented in \cite{query} in which the data selection problem is posed as an information retrieval problem. Using an initial language model an SMT system is trained. This system is used to translate the test sentences, every possible translation according to the initial system will serve as a hypothesis. Next, the hypotheses are used as queries on the general domain corpus to retrieve sentences that are alike the hypothesis (and thus are likely to be similar to the sentences in the in-domain corpus). Using the retrieve sentences the final translation model is trained. The queries can either be bag of words from one or multiple hypotheses, or structured queries where the order of words is preserved. The authors find that the structured query model works best, leading them to the conclusion that preserving word order information while extracting sentences from a general domain corpus improves performance. Although they have not performed experiments, the authors coin the idea of repeating this process iteratively. SOMETHING ABOUT HOW OUR SIMILARITY IS LIKE A QUERY EXPANSION OR SOMETHING ALONG THOSE LINES, CAN THIS BE DONE ITERATIVELY?
+
+% Misschien beter voor discussie?
+%We represent 3 new domain adaptation methods at corpus level. As noted in \cite{pseudo} it is computationally less expensive to filter a corpus than to train multiple translation systems. Our approach is focused towards retrieving the in-domain sentences from a general domain corpus. As found in \cite{pseudo} using cross-entropy methods will not necessarily result in retrieving the in-domain sentences. Therefore, we have devised several new methods that focus on X. As in \cite{query} who use hypotheses to retrieve relevant sentences, we will be exploring methods that will expand the sentences that we have with similar words.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -115,33 +115,54 @@ We did good.
 
 
 \begin{thebibliography}{}
-\bibitem[\protect\citename{Guthrie \bgroup et al.\egroup }1991]{Guthrie:92}
-Joe A. Guthrie, Louise Guthrie, Yorick Wilks and Homa Aidinejad.
-\newblock 1991.
-\newblock Subject-dependent co-occurrence and word sense disambiguation.
-\newblock Proceedings of the 29th annual meeting on Association for Computational Linguistics, 
-146--152
+
+\bibitem[\protect\citename{Axelrod \bgroup et al. \egroup} 2011]{pseudo}
+Axelrod, Amittai and He, Xiaodong and Gao, Jianfeng
+\newblock 2011.
+\newblock Domain adaptation via pseudo in-domain data selection.
+\newblock Proceedings of the Conference on Empirical Methods in Natural Language Processing, 
+355--362
 \newblock
 Association for Computational Linguistics
 
-\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013a]{Mikolov:13}
-Tomas Mikolov, Wen-tau Yih, and Geoffrey Zweig.
-\newblock 2013a.
-\newblock Linguistic regularities in continuous space word representations.
-\newblock Proceedings of NAACL-HLT, 
-746--751
+\bibitem[\protect\citename{Moore and Lewis}2010]{intelligent}
+Moore, Robert C and Lewis, William
+\newblock 2010.
+\newblock Intelligent selection of language model training data.
+\newblock Proceedings of the ACL 2010 Conference Short Papers, 
+220--224
+\newblock
+Association for Computational Linguistics
 
-\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013b]{MikolovMT:13}
-Tomas Mikolov, Quoc V. Le and Ilya Sutskever.
-\newblock 2013b.
-\newblock Exploiting Similarities among Languages for Machine Translation.
-\newblock arXiv preprint arXiv:1309.4168, 
-
-\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013c]{Mikolov:13c}
+\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013]{word2vec}
 Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean.
-\newblock 2013c.
+\newblock 2013.
 \newblock Efficient Estimation of Word Representations in Vector Space.
 \newblock Proceedings of Workshop at ICLR
+
+\bibitem[\protect\citename{Zhao \bgroup et al. \egroup}2004]{query}
+Zhao, Bing and Eck, Matthias and Vogel, Stephan
+\newblock 2004.
+\newblock Language model adaptation for statistical machine translation with structured query models
+\newblock Proceedings of the 20th international conference on Computational Linguistics, 
+411
+\newblock
+Association for Computational Linguistics
+
+%\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013a]{Mikolov:13}
+%Tomas Mikolov, Wen-tau Yih, and Geoffrey Zweig.
+%\newblock 2013a.
+%\newblock Linguistic regularities in continuous space word representations.
+%\newblock Proceedings of NAACL-HLT, 
+%746--751
+
+%\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013b]{MikolovMT:13}
+%Tomas Mikolov, Quoc V. Le and Ilya Sutskever.
+%\newblock 2013b.
+%\newblock Exploiting Similarities among Languages for Machine Translation.
+%\newblock arXiv preprint arXiv:1309.4168, 
+
+
 
 \end{thebibliography}
 
