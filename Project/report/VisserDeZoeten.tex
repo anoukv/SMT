@@ -1,25 +1,26 @@
 \documentclass[11pt]{article}
-\usepackage{geometry} 
-\usepackage{graphicx}
 \usepackage{float}
-\geometry{a4paper}
-      
+\usepackage{acl2014}
+\usepackage{times}
+\usepackage{url}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{breqn}
 
-\bibliographystyle{plain}
+%\setlength\titlebox{5cm}
 
 \title{On data selection for statistical machine translation.}
 \author{Anouk Visser \& R\'emi de Zoeten}
-\date{} 
+\date{}
 
 \begin{document}
 
 \maketitle
-\newpage
-\tableofcontents
-\newpage
 
-\section{Abstract}
+\begin{abstract}
 HY
+\end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
@@ -27,7 +28,8 @@ The performance of a statistical machine translation systems is dependent on the
 In this work we investigate how to extract in-domain sentences from a large mixed-domain training corpus. We develop and evaluate several methods to order the set of training sentences based on the estimated likelihood that the sentence pair is in-domain. The top-$n$ sentences are then used for training and evaluating a translation system and comparing the performance to a system that is trained with $n$ sentence pairs that were randomly selected from the mixed-domain corpus.
 The paper is organised as follows. Section \ref{sec:related} describes related work, section \ref{sec:methods} explains the different methods that we have used for sentence-reordering, section \ref{sec:results} shows the performance of our methods in terms of sentence-reordering ability and the effects this has on translation performance, and finally we end with some concluding remarks \ref{sec:conclusion}.
 
-\section{Related work}
+
+\section{Related Work}
 \label{sec:related}
 In order to improve the performance of statistical machine translation, a lot of research is done in the area of domain adaptation. Through domain adaptation we would like to improve the performance of an SMT system on one specific domain. However, as the performance of an SMT system depends on the amount of training data, we cannot simply train the model with in-domain data only. In domain adaptation one can choose to work on the corpus level, i.e. discard data from a general domain corpus that is not closely related to the domain or on the model level, where we could for example interpolate a general translation model and an in-domain translation model. In “Domain Adaptation via Pseudo In-Domain Data Selection” the authors work both on the corpus leven and on the model level. To discard data from the general domain corpus, the authors use three simple cross-entropy based models: cross-entropy, cross-entropy difference and bilingual cross-entropy. Cross-entropy and cross-entropy difference were both proposed by Moore and Lewis 2010, presented in “Intelligent Selection of Language Model Training Data”, in this paper the authors conclude that X. In “Domain adaptation”, it turns out that X. In addition to this, the authors note that the bilingual cross-entropy outperforms all methods. However, they find that all three models are not necessarily good at retrieving the actual in-domain sentences from the general-domain corpus, but instead they extract what they call pseudo in-domain data that has a different distribution compared to the actual in-domain data. 
 
@@ -35,6 +37,7 @@ Another approach to domain adaptation for SMT is presented in “Language Model Ad
 
 We represent X new domain adaptation model at corpus level. As noted in “Pseudo” it is computationally less expensive to filter a corpus than to train multiple translation systems. Our approach is focused towards retrieving the in-domain sentences from a general domain corpus. As found in “Pseudo” using cross-entropy methods will not necessarily result in retrieving the in-domain sentences. Therefore, we have devised several new methods that focus on X. 
 As in “Query” who use hypotheses to retrieve relevant sentences, we will be exploring methods that will expand the sentences that we have with similar words.
+
 
 \section{Methods for mixed domain re-ordering}
 \label{sec:methods}
@@ -57,34 +60,7 @@ These in-domain sentences are somewhat typical while the out-domain sentences ca
 
 To test if these pos-tags hold information about the domain that they come from we represented each sentence as a histogram of pos-tags and trained a linear support vector machine to classify if a sentence is in or out domain. Spanish and English pos-tags were assigned to different bins, and together we observed $76$ pos-tags.
 
-\subsection{Word-based scoring}
-In this method every word in a sentence will provide evidence independent evidence that the sentence is in, or out domain. The words in both the in and out-domain set are counted and using these counts the probability that a given word belongs to an in-domain sentence can be estimated. Let \textit{pos} be a map \textit{word} $\rightarrow$ \textit{word-frequency} that maps a word to the number of times it has been observed in the positive set and \textit{neg} a similar map to retrieve the number of times a word has been observed in the negative set.
-The estimated probability of a sentence $s$ being in the positive set given one word $w$ from the sentence is then defined as:
-
-\begin{equation} \label{eq:simple}
-P(s\in positive | w) = \frac{pos[w]}{pos[w] + neg[w]}
-\end{equation}
-
-If the above probability is undefined (\textit{pos} + \textit{neg} $= 0$) then $P(s\in positive | w)$ is set to $0.5$.
-
-Now the probability of $P(s\in positive | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in positive | w)$ have not been smoothed as would be common in natural language processing. We chose instead to collect 'evidence scores' for both hypothesis $s\in positive$ and $s\in negative$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
-
-\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} P(s\in positive | w) + \sum_{w\in s} P(s\in negative | w)}  \end{equation}
-\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} [ P(s\in positive | w) + P(s\in negative | w) ]}  \end{equation}
-\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | }  \end{equation}
-
-We then introduced the tuneable parameter $C$ which significantly improves our results in our expiriments:
-\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | + C}  \end{equation}
-
-\subsubsection{Extended weighted scoring}
-We implemented an extension to the word-based scoring method, where every sentence gets expanded. The sentence is expanded by adding to every word in the sentence the $E$ most similar words. We used the \textit{word to vec} method and implementation by [REF] and trained on the union of the training set and set that needs to be split in order to obtain a vector representation of every word that occurs more than $5$ times. The wordvectors are $320$ real numbers and can be used to define word similarity by the cosine similarity of their wordvector representations. 
-This sentence expansion is used as a pre-processing step before applying the above described word-based scoring method, and does not affect anything to the basic word-based scoring method when $E = 0$.
-
-\section{Results}
-\label{sec:results}
-We present the results of our three different methods with different parameters in the following table, and in graphs. We chose to report recall at $50.000$ because out of the $450.000$ sentences that are re-ordered, $50.000$ are in-domain. 
-
-\begin{table}[H]
+\begin{table*}[t]
     \begin{tabular}{|l|l|l|l|l|l|}
     \hline
     Method & parameters & Software | Recall at 50.000  & Legal | Recall at 50.000 \\ \hline
@@ -98,11 +74,39 @@ We present the results of our three different methods with different parameters 
     Word-based scoring  & E = 2, C = 2 & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
     Word-based scoring  & E = 5, C = 2 & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
     \end{tabular}
-\end{table}
+\end{table*}
+
+
+\subsection{Word-based scoring}
+In this method every word in a sentence will provide evidence independent evidence that the sentence is in, or out domain. The words in both the in and out-domain set are counted and using these counts the probability that a given word belongs to an in-domain sentence can be estimated. Let \textit{pos} be a map \textit{word} $\rightarrow$ \textit{word-frequency} that maps a word to the number of times it has been observed in the positive set and \textit{neg} a similar map to retrieve the number of times a word has been observed in the negative set.
+The estimated probability of a sentence $s$ being in the positive set given one word $w$ from the sentence is then defined as:
+
+\begin{equation} \label{eq:simple}
+P(s\in positive | w) = \frac{pos[w]}{pos[w] + neg[w]}
+\end{equation}
+
+If the above probability is undefined (\textit{pos} + \textit{neg} $= 0$) then $P(s\in positive | w)$ is set to $0.5$.
+
+Now the probability of $P(s\in positive | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in positive | w)$ have not been smoothed as would be common in natural language processing. We chose instead to collect 'evidence scores' for both hypothesis $s\in positive$ and $s\in negative$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
+
+\begin{dmath} P(s\in pos | s)  = \\ \frac{\sum_{w\in s} P(s\in pos | w)}{\sum_{w\in s} P(s\in pos | w) + \sum_{w\in s} P(s\in neg | w)} \end{dmath}
+
+\begin{dmath} P(s\in pos | s)  = \\ \frac{\sum_{w\in s} P(s\in pos | w)}{\sum_{w\in s} [ P(s\in pos | w) + P(s\in neg | w) ]}  \end{dmath}
+
+\begin{equation} P(s\in pos | s)  = \frac{\sum_{w\in s} P(s\in pos | w)}{ | s | }  \end{equation}
+
+We then introduced the tuneable parameter $C$ which significantly improves our results in our experiments:
+\begin{equation} P(s\in pos | s)  = \frac{\sum_{w\in s} P(s\in pos | w)}{ | s | + C}  \end{equation}
 
 
 
+\subsubsection{Extended weighted scoring}
+We implemented an extension to the word-based scoring method, where every sentence gets expanded. The sentence is expanded by adding to every word in the sentence the $E$ most similar words. We used the \textit{word to vec} method and implementation by [REF] and trained on the union of the training set and set that needs to be split in order to obtain a vector representation of every word that occurs more than $5$ times. The wordvectors are $320$ real numbers and can be used to define word similarity by the cosine similarity of their wordvector representations. 
+This sentence expansion is used as a pre-processing step before applying the above described word-based scoring method, and does not affect anything to the basic word-based scoring method when $E = 0$.
 
+\section{Results}
+\label{sec:results}
+We present the results of our three different methods with different parameters in the following table, and in graphs. We chose to report recall at $50.000$ because out of the $450.000$ sentences that are re-ordered, $50.000$ are in-domain. 
 
 
 \section{Conclusion}
@@ -110,9 +114,35 @@ We present the results of our three different methods with different parameters 
 We did good.
 
 
+\begin{thebibliography}{}
+\bibitem[\protect\citename{Guthrie \bgroup et al.\egroup }1991]{Guthrie:92}
+Joe A. Guthrie, Louise Guthrie, Yorick Wilks and Homa Aidinejad.
+\newblock 1991.
+\newblock Subject-dependent co-occurrence and word sense disambiguation.
+\newblock Proceedings of the 29th annual meeting on Association for Computational Linguistics, 
+146--152
+\newblock
+Association for Computational Linguistics
 
-\bibliography{test}
+\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013a]{Mikolov:13}
+Tomas Mikolov, Wen-tau Yih, and Geoffrey Zweig.
+\newblock 2013a.
+\newblock Linguistic regularities in continuous space word representations.
+\newblock Proceedings of NAACL-HLT, 
+746--751
 
+\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013b]{MikolovMT:13}
+Tomas Mikolov, Quoc V. Le and Ilya Sutskever.
+\newblock 2013b.
+\newblock Exploiting Similarities among Languages for Machine Translation.
+\newblock arXiv preprint arXiv:1309.4168, 
 
+\bibitem[\protect\citename{Mikolov \bgroup et al.\egroup }2013c]{Mikolov:13c}
+Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean.
+\newblock 2013c.
+\newblock Efficient Estimation of Word Representations in Vector Space.
+\newblock Proceedings of Workshop at ICLR
 
-\end{document}  
+\end{thebibliography}
+
+\end{document}
