@@ -123,11 +123,11 @@ if __name__ == '__main__':
 	vectorsEnglish = load_vectors(pathEnglish)
 	vectorsSpanish = load_vectors(pathSpanish)
 
-	results = get_counting_scores(vectorsEnglish, vectorsSpanish, top=2)
+	results = get_counting_scores(vectorsEnglish, vectorsSpanish, top=5)
 
 	stop = time()
 	print "Time:", int(stop - start + 0.5)
-	f = open('results_wbs_2_2_20000.py', 'w')
+	f = open('results_wbs_5_2_20000.py', 'w')
 	f.write("results = " + str(results))
 	f.close()
 	

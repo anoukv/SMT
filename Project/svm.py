@@ -63,29 +63,31 @@ def score_sentences((X,y), SVM):
 	results = []
 	for (b,s) in zip(y,X):
 		results.append((b,SVM.decision_function(s)))
-	return sorted(results, key = lambda x : x[1], reverse=True)
+	return results, sorted(results, key = lambda x : x[1], reverse=True)
 
 def go():
 	print "Loading data..."
 	original_data = read_datasets(descriminative=True, development=True, flat=True, ext=".pos")
 	data = data_to_svm_input(original_data)
 	r = []
+	o = []
 	for (mixed, train) in data:
 		print "\tTraining..."
 		SVM = train_svm(train)
 		print "\tScoring..."
-		results = score_sentences(mixed, SVM)
+		original, results = score_sentences(mixed, SVM)
 		r.append(results)
+		o.append(original)
 		print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
 		print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
 		print
-	return tuple(r), original_data
+	return o, tuple(r)
 
 
 
 if __name__ == '__main__':
-	results, original_data = go()
-	save_results(results, filename="svm_results")
+	original, results = go()
+	save_results(original, filename="svm_results")
 	plot_r(results)
 
 
