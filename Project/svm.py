@@ -43,7 +43,7 @@ def data_to_svm_input(data):
 					y.append(1)
 				else:
 					y.append(0)
-				s = [ 0 for _ in xrange(2*dic_len)]
+				s = [ 0 for _ in xrange(dic_len)]
 				for n in sent:
 					s[n] += 1
 				X.append(s)

@@ -43,7 +43,7 @@ def findMostSimilarWords(vectors, word, top, cache):
 				rep = vectors[wordvector]
 				sim = sum([wordRepresentation[i] * rep[i] for i in xrange(dim)])
 				addToLimitSet(mostSimilar, wordvector, sim)
-		mostSimilar = tuple(map(lambda x: x[1], mostSimilar))
+		mostSimilar = tuple(map(lambda x: x[0], mostSimilar))
 		cache[word] = mostSimilar
 		return mostSimilar
 	else:
