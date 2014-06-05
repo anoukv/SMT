@@ -1,3 +1,5 @@
+
+3-2 (called 5-2)
 Remis-MacBook-Pro:Project Remi$ pypy counting_scores_extended.py 
 	Loading projections...
 	Loading projections...
@@ -6,16 +8,19 @@ Loading data...
 	Reading rest..
 	Training...
 	Scoring...
-	In: 37353
-	Out: 12647
+	In: 36645
+	Out: 13355
 
 	Training...
 	Scoring...
-	In: 19627
-	Out: 30373
+	In: 20357
+	Out: 29643
 
-Time: 3043
-Remis-MacBook-Pro:Project Remi$ 
+Saving results..
+	Reading main..
+	Reading rest..
+Time: 3239
+
 Remis-MacBook-Pro:Project Remi$ pypy counting_scores_extended.py 
 	Loading projections...
 	Loading projections...
@@ -24,12 +29,15 @@ Loading data...
 	Reading rest..
 	Training...
 	Scoring...
-	In: 36108
-	Out: 13892
+	In: 36208
+	Out: 13792
 
 	Training...
 	Scoring...
-	In: 18306
-	Out: 31694
+	In: 19907
+	Out: 30093
 
-Time: 3551
+Saving results..
+	Reading main..
+	Reading rest..
+Time: 3839

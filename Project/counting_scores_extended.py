@@ -1,4 +1,5 @@
 from readers import read_datasets
+from results_to_files import save_results
 # from plotter import plot_retreival
 from collections import defaultdict
 from math import sqrt
@@ -96,24 +97,26 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True, top=5):
 					
 				pos += score
 			results.append((b, pos/float(len(sentenceBoth)+2)))
-		return sorted(results, key = lambda x : x[1], reverse=True)
+		return results, sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
 	data = read_datasets(descriminative=True, development=True, flat=False)
 	r = []
+	o = []
 	for (mixed, train) in data:
 		if verbose:
 			print "\tTraining..."
 		(posW, negW) = get_frequency_counts(train, vectorsEnglish, vectorsSpanish, cache, top)
 		if verbose:
 			print "\tScoring..."
-		results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache, top)
+		original, results = score_sentences(mixed, (posW, negW), vectorsEnglish, vectorsSpanish, cache, top)
 		r.append(results)
+		o.append(original)
 		if verbose:
 			print "\tIn:", len(filter(lambda x:x[0], results[:50000]))
 			print "\tOut:", len(filter(lambda x:x[0], results[50000:]))
 			print
-	return tuple(r)
+	return o, tuple(r)
 
 if __name__ == '__main__':
 	start = time()
@@ -123,11 +126,13 @@ if __name__ == '__main__':
 	vectorsEnglish = load_vectors(pathEnglish)
 	vectorsSpanish = load_vectors(pathSpanish)
 
-	results = get_counting_scores(vectorsEnglish, vectorsSpanish, top=5)
+	original, results = get_counting_scores(vectorsEnglish, vectorsSpanish, top=5)
+
+	save_results(original, filename="wbs_E_results")
 
 	stop = time()
 	print "Time:", int(stop - start + 0.5)
-	f = open('results_wbs_5_2_20000.py', 'w')
+	f = open('results_wbs_3_2_20000.py', 'w')
 	f.write("results = " + str(results))
 	f.close()
 	
