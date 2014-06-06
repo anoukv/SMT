@@ -1,0 +1,118 @@
+\documentclass[11pt]{article}
+\usepackage{geometry} 
+\usepackage{graphicx}
+\usepackage{float}
+\geometry{a4paper}
+      
+
+\bibliographystyle{plain}
+
+\title{On data selection for statistical machine translation.}
+\author{Anouk Visser \& R\'emi de Zoeten}
+\date{} 
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Abstract}
+HY
+
+\section{Introduction}
+\label{sec:intro}
+The performance of a statistical machine translation systems is dependent on the data that is used to train the model. For accurate translations it is useful to base the model on training data that matches the domain where the machine translation will be applied. When translating a text about software, ideally, the sentences in the training corpus should be cherry picked from the software domain. 
+In this work we investigate how to extract in-domain sentences from a large mixed-domain training corpus. We develop and evaluate several methods to order the set of training sentences based on the estimated likelihood that the sentence pair is in-domain. The top-$n$ sentences are then used for training and evaluating a translation system and comparing the performance to a system that is trained with $n$ sentence pairs that were randomly selected from the mixed-domain corpus.
+The paper is organised as follows. Section \ref{sec:related} describes related work, section \ref{sec:methods} explains the different methods that we have used for sentence-reordering, section \ref{sec:results} shows the performance of our methods in terms of sentence-reordering ability and the effects this has on translation performance, and finally we end with some concluding remarks \ref{sec:conclusion}.
+
+\section{Related work}
+\label{sec:related}
+In order to improve the performance of statistical machine translation, a lot of research is done in the area of domain adaptation. Through domain adaptation we would like to improve the performance of an SMT system on one specific domain. However, as the performance of an SMT system depends on the amount of training data, we cannot simply train the model with in-domain data only. In domain adaptation one can choose to work on the corpus level, i.e. discard data from a general domain corpus that is not closely related to the domain or on the model level, where we could for example interpolate a general translation model and an in-domain translation model. In “Domain Adaptation via Pseudo In-Domain Data Selection” the authors work both on the corpus leven and on the model level. To discard data from the general domain corpus, the authors use three simple cross-entropy based models: cross-entropy, cross-entropy difference and bilingual cross-entropy. Cross-entropy and cross-entropy difference were both proposed by Moore and Lewis 2010, presented in “Intelligent Selection of Language Model Training Data”, in this paper the authors conclude that X. In “Domain adaptation”, it turns out that X. In addition to this, the authors note that the bilingual cross-entropy outperforms all methods. However, they find that all three models are not necessarily good at retrieving the actual in-domain sentences from the general-domain corpus, but instead they extract what they call pseudo in-domain data that has a different distribution compared to the actual in-domain data. 
+
+Another approach to domain adaptation for SMT is presented in “Language Model Adaptation for Statistical Machine Translation with Sturctured Query Models” in which the authors pose the data selection problem as an information retrieval problem. Using an initial language model they train an SMT system and let the system translate the sentence creating multiple hypotheses. Next, they use the hypotheses as queries on the general domain corpus to retrieve sentences that could enhance translation performance because they are similar to the in-domain corpus. Using these sentences they train their final translation model. The queries can be bag of words from one or multiple hypotheses, or can be structured queries, which preserve the order of the words in the sentence. The authors find that the structured query model works best, preserving word order information while extracting sentences from a general domain corpus improves performance. In their paper the authors note that this process can be performed iteratively. 
+
+We represent X new domain adaptation model at corpus level. As noted in “Pseudo” it is computationally less expensive to filter a corpus than to train multiple translation systems. Our approach is focused towards retrieving the in-domain sentences from a general domain corpus. As found in “Pseudo” using cross-entropy methods will not necessarily result in retrieving the in-domain sentences. Therefore, we have devised several new methods that focus on X. 
+As in “Query” who use hypotheses to retrieve relevant sentences, we will be exploring methods that will expand the sentences that we have with similar words.
+
+\section{Methods for mixed domain re-ordering}
+\label{sec:methods}
+Our data consists of English-Spanish sentence pairs in the software domain, legal domain and out-domain.
+The training data consists of $50.000$ sentence pairs for each of the three domains.
+Our test data consists of an out-domain dataset of $400.000$ sentences, which is combined with $50.000$ in-domain sentences to create two sets of $450.000$ sentence pairs that need to be ranked according to their relevance to the domain.
+
+\subsection{Clustering and nearest neighbour}
+For this method we first extract the frequencies of all words in the sentence pairs and represent them as a sparse vector of unit length. We then cluster all sentences based on their vector representations. The cluster centres are the relative frequencies of the words of all sentences that are assigned to the cluster. Clusters represent a mixture of in and out-domain sentences.To determine if a given sentence is in or out-domain we find the cluster who's centre has the greatest cosine similarity with the sentence. The probability that a sentence is in-domain is then defined as the number of in-domain sentences that are assigned to the cluster divided by the total number of sentences assigned to the cluster:
+
+$$ P(in|C{entre}) = \frac{|C_{in}|}{|C_{in}| + |C_{out}|} $$
+
+The clustering is done with just 8 cluster centres. Although the probability estimate might be more accurate when more cluster centres are used we did not experiment with cluster sizer larger than 8 because of the computational cost.
+
+\subsection{Support vector machine}
+Our intuition is that the part-of-speech (pos) tag distribution gives clues about the domain that the sentence is from. For example, in the legal domain there is the sentence:
+\textit{With regard to those countries , the UN went as far as to adopt what is referred to as a no action motion .}\\
+In the software domain there is the sentence \textit{The frame analysis settings are applicable on a per document basis .}\\
+These in-domain sentences are somewhat typical while the out-domain sentences can really be any kind of sentence.
+
+To test if these pos-tags hold information about the domain that they come from we represented each sentence as a histogram of pos-tags and trained a linear support vector machine to classify if a sentence is in or out domain. Spanish and English pos-tags were assigned to different bins, and together we observed $76$ pos-tags.
+
+\subsection{Word-based scoring}
+In this method every word in a sentence will provide evidence independent evidence that the sentence is in, or out domain. The words in both the in and out-domain set are counted and using these counts the probability that a given word belongs to an in-domain sentence can be estimated. Let \textit{pos} be a map \textit{word} $\rightarrow$ \textit{word-frequency} that maps a word to the number of times it has been observed in the positive set and \textit{neg} a similar map to retrieve the number of times a word has been observed in the negative set.
+The estimated probability of a sentence $s$ being in the positive set given one word $w$ from the sentence is then defined as:
+
+\begin{equation} \label{eq:simple}
+P(s\in positive | w) = \frac{pos[w]}{pos[w] + neg[w]}
+\end{equation}
+
+If the above probability is undefined (\textit{pos} + \textit{neg} $= 0$) then $P(s\in positive | w)$ is set to $0.5$.
+
+Now the probability of $P(s\in positive | s)$ can be defined by some product of word probabilities, but this will not behave well because the probabilities $P(s\in positive | w)$ have not been smoothed as would be common in natural language processing. We chose instead to collect 'evidence scores' for both hypothesis $s\in positive$ and $s\in negative$ by summing the un-smoothed probabilities and then applying a formula similar to \ref{eq:simple}. This produces the following probability estimation:
+
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} P(s\in positive | w) + \sum_{w\in s} P(s\in negative | w)}  \end{equation}
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{\sum_{w\in s} [ P(s\in positive | w) + P(s\in negative | w) ]}  \end{equation}
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | }  \end{equation}
+
+We then introduced the tuneable parameter $C$ which significantly improves our results in our expiriments:
+\begin{equation} P(s\in positive | s)  = \frac{\sum_{w\in s} P(s\in positive | w)}{ | s | + C}  \end{equation}
+
+\subsubsection{Extended weighted scoring}
+We implemented an extension to the word-based scoring method, where every sentence gets expanded. The sentence is expanded by adding to every word in the sentence the $E$ most similar words. We used the \textit{word to vec} method and implementation by [REF] and trained on the union of the training set and set that needs to be split in order to obtain a vector representation of every word that occurs more than $5$ times. The wordvectors are $320$ real numbers and can be used to define word similarity by the cosine similarity of their wordvector representations. 
+This sentence expansion is used as a pre-processing step before applying the above described word-based scoring method, and does not affect anything to the basic word-based scoring method when $E = 0$.
+
+\section{Results}
+\label{sec:results}
+We present the results of our three different methods with different parameters in the following table, and in graphs. We chose to report recall at $50.000$ because out of the $450.000$ sentences that are re-ordered, $50.000$ are in-domain. 
+
+\begin{table}[H]
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    Method & parameters & Software | Recall at 50.000  & Legal | Recall at 50.000 \\ \hline
+    NN      & 4, 10          & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
+    NN      & 8, 10          & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
+    SVM      & N.A.          & 24021 - 48.0\%  & 13333 - 27.7\%        \\ \hline
+    Word-based scoring  & E = 0, C = 0 & 33996 - 67.9\%  & 16174 - 32.3\%        \\ \hline
+    Word-based scoring  & E = 0, C = 1 & \textbf{37752 - 75.5\%}  & 20664 - 41.3\%        \\ \hline
+    Word-based scoring  & E = 0, C = 2 & 37727 - 75.4\%  & 22149 - 44.2\%        \\ \hline
+    Word-based scoring  & E = 0, C = 3 & 37081 - 74.1\%  & \textbf{22410 - 44.8\%}        \\ \hline
+    Word-based scoring  & E = 2, C = 2 & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
+    Word-based scoring  & E = 5, C = 2 & 20.000 - 40\%  & 20.000 - 40\%        \\ \hline
+    \end{tabular}
+\end{table}
+
+
+
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+We did good.
+
+
+
+\bibliography{test}
+
+
+
+\end{document}  

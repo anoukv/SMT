@@ -1,0 +1,11 @@
+Welcome.
+
+SVM.py, counting_scores.py and counting_scores_extended.py are the main code that was used for out expiriments. 
+The data is supposed to be in ../../project3_data/
+
+The counting scores run ~15 times faster using the pypy alternative python implementation.
+
+The profiling and NN.py contain code for expiriments that we did not end up using in our report. NN is nearest neighbor, profiling is some pos tag modeling. 
+
+Readers read the sentences and split and mix the data.
+Plotter makes the nice plots we had in our report.
