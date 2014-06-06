@@ -1,5 +1,5 @@
 from readers import read_datasets
-from results_to_files import save_results
+# from results_to_files import save_results
 # from plotter import plot_retreival
 from collections import defaultdict
 from math import sqrt
@@ -96,7 +96,7 @@ def get_counting_scores(vectorsEnglish, vectorsSpanish, verbose=True, top=5):
 					score = posW[word] / float(posW[word]+negW[word])
 					
 				pos += score
-			results.append((b, pos/float(len(sentenceBoth)+2)))
+			results.append((b, pos/float(len(sentenceBoth)+11)))
 		return results, sorted(results, key = lambda x : x[1], reverse=True)
 
 	print "Loading data..."
